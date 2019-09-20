@@ -1,6 +1,3 @@
-#The original tweets are downloaded from https://www.kaggle.com/kazanova/sentiment140/downloads/sentiment140.zip/2, then
-#cat training.1600000.processed.noemoticon.csv | grep -i 'healthcare' > /tmp/healthcare
-#to select these with key word healthcare.
 "0","1678407956","Sat May 02 06:36:34 PDT 2009","NO_QUERY","joshuaseo","@HelpHealthCare I'm republican. But I think Obama is in the right direction. Just my only worry is hyperinflation. "
 "0","1932878650","Tue May 26 22:26:09 PDT 2009","NO_QUERY","edoswald","@marqueemarc Yeah. But we've got four years. Personally, healthcare and this economy are bigger issues to everyone (and me), sad to say "
 "0","1962956295","Fri May 29 11:59:01 PDT 2009","NO_QUERY","mattymax","Sad. I don't know what to do with my life. Everything I have done since the age of 16 has been towards healthcare and nursing "
