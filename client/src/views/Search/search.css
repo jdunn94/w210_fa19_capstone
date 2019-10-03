@@ -1,0 +1,16 @@
+.search-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  position: relative;
+}
+
+.search-box {
+}
+
+.map-background {
+  height: 100%;
+  position: absolute;
+  z-index: 0;
+}
