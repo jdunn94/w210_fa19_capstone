@@ -1,0 +1,14 @@
+#Main.Py
+import tweepy
+
+from tweepy import API, parsers, OAuthHandler
+
+def get_tweets(request):
+    auth = OAuthHandler("consumer_key", "consumer_key_secret")
+    auth.set_access_token("access_token", "access_token_secret")
+    api = API(auth, parser=parsers.JSONParser())
+    results = api.search('homeless')
+    return str(results)
+	
+#requirements.txt
+tweepy
