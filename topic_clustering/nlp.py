@@ -30,14 +30,12 @@ from operator import itemgetter # help with dataframes
 
 from autocorrect import Speller
 
-DATA_FILENAME = "housing.csv"
-OUTPUT_FILE = open("{}.cleaned.txt".format(DATA_FILENAME), "w+")
+OUTPUT_FILE = open("cleaned_tweets.csv", "w")
 WORDS_KEEP = ['housing', 'san', 'francisco', 'house', 'building',
               'apartment', 'home', 'residence', 'dwelling', 'accommodation',
               'place', 'habitation', 'abode', 'domicile', 'living']
 
-def nlp(data):
-  tweet_list_org = data.tweet # convert DF to list (tweets only) NOT a nested list
+def nlp(tweet_list_org):
   emoticons_str = r"""
   (?:
   [:=;] # Eyes
@@ -66,7 +64,7 @@ def nlp(data):
   other_word = r'(?:[\w_]+)'
   other_stuff = r'(?:\S)' # anything else - NOT USED
   start_pound = r"([#?])(\w+)" # Start with #
-  start_quest_pound = r"(?:^|\s)([#?])(\w+)" # Start with ? or with #
+  start_quest_pound = r"(?:^|\s)([?])(\w+)" # Start with ?
   cont_number = r'(\w*\d\w*)' # Words containing numbers
 
   #      Remove '[' and ']' brackets
@@ -103,7 +101,7 @@ def nlp(data):
 
   # Use tweetList -  that is a list from DF (using .tolist())
   outlist_init = filterPick(tweet_list_org, search_regex) # It is a tuple: initial list from all tweets
-  char_remove = [']', '[', '(', ')', '{', '}'] # characters to be removed
+  char_remove = ['#', ']', '[', '(', ')', '{', '}'] # characters to be removed
   emotion_list = [':)', ';)', '(:', '(;', '}', '{','}']
   word_garb = ['here', 'there', 'where', 'when', 'would', 'should', 'could','thats', 'youre', 'thanks', 'hasn',\
                'thank', 'https', 'since', 'wanna', 'gonna', 'aint', 'http', 'unto', 'onto', 'into', 'havent',\
@@ -111,8 +109,6 @@ def nlp(data):
                'weve', 'theyve']
 
   # Dictionary with Replacement Pairs ******************************************************************************
-  repl_dict = {'googleele': 'goog', 'lyin': 'lie', 'googles': 'goog', 'aapl':'apple',\
-             'msft':'microsoft', 'google': 'goog', 'googl':'goog'}
   exclude = list(string.punctuation) + emotion_list + word_garb
 
   # Convert tuple to a list, then to a string; Remove the characters; Stays as a STRING. Porter Stemmer
@@ -122,21 +118,22 @@ def nlp(data):
   # Auto spelling corrector in python3
   spell = Speller(lang='en')
 
+  counter = 1
   for tweet in outlist_init:
     tw_clean = []
     tw_clean = [ch for ch in tweet if ch not in char_remove]
     tw_clean = re.sub(URL, "", str(tw_clean))
     tw_clean = re.sub(html_tag, "",str(tw_clean))
-    tw_clean = re.sub(hash_tag, "",str(tw_clean))
+    #tw_clean = re.sub(hash_tag, "",str(tw_clean))
     tw_clean = re.sub(slash_all,"", str(tw_clean))
     tw_clean = re.sub(cont_number, "",str(tw_clean))
     tw_clean = re.sub(numbers, "",str(tw_clean))
-    tw_clean = re.sub(start_pound, "",str(tw_clean))
+    #tw_clean = re.sub(start_pound, "",str(tw_clean))
     tw_clean = re.sub(start_quest_pound, "",str(tw_clean))
     tw_clean = re.sub(at_sign, "",str(tw_clean))
     tw_clean = re.sub("'", "",str(tw_clean))
     tw_clean = re.sub('"', "",str(tw_clean))
-    tw_clean = re.sub(r'(?:^|\s)[@#].*?(?=[,;:.!?]|\s|$)', r'', tw_clean) # Removes # and @ in words (lookahead)
+    tw_clean = re.sub(r'(?:^|\s)[@].*?(?=[,;:.!?]|\s|$)', r'', tw_clean) # Removes # and @ in words (lookahead)
     tw_clean = lmtzr.lemmatize(str(tw_clean))
     tw_clean = stemmer.stem(str(tw_clean))
     tw_clean_lst = re.findall(r'\w+', str(tw_clean))
@@ -144,24 +141,32 @@ def nlp(data):
     tw_clean_lst = [word for word in tw_clean_lst if word not in exclude]
     tw_clean_lst = str([word for word in tw_clean_lst if len(word)>MIN_WORDS_PER_TWEET or word.lower() in WORDS_KEEP])
     tw_clean_lst = re.findall(r'\w+', str(tw_clean_lst))
-    tw_clean_lst = [replace_all(word, repl_dict) for word in tw_clean_lst]
-    valid_words = [word for word in WORDS_KEEP if word in tw_clean_lst]
-    if len(valid_words) == 0:
-        continue
-    print("org tweet = ", tweet)
+    #valid_words = [word for word in WORDS_KEEP if word in tw_clean_lst]
+    #if len(valid_words) == 0:
+    #    continue
+    if len(tw_clean_lst) < MIN_WORDS_PER_TWEET:
+      continue
+    #print("org tweet = ", tweet)
     tw_clean_str = spell(" ".join(tw_clean_lst))
-    print("cleaned tweet = (", tw_clean_str, ")")
-    print("=" * 70)
-    OUTPUT_FILE.write(tw_clean_str + "\r\n")
-
+    #print("cleaned tweet = (", tw_clean_str, ")")
+    #print("=" * 70)
+    cleaned_tw = re.sub(r",", " ", tweet)
+    OUTPUT_FILE.write("{},{},{}\n".format(counter, cleaned_tw, tw_clean_str))
+    counter = counter + 1
+  print("Write cleaned tweets into cleaned_tweets.csv.\r\n")
   # end of nlp func
 
-def read_data():
+def read_csv():
   data = pd.read_csv(DATA_FILENAME, delimiter=',', names=['sentiment', 'id', 'date', 'query', 'user', 'tweet'])
   print("Read data stats: ", data.count())
   #print("Top data records")
   #print(data.head()[['tweet']])
   return data
+
+def read_tweets_from_txt(file_name):
+  with open(file_name) as f:
+    return f.readlines()
+
 
 # Words Replacement ***************************************************************************************
 def replace_all(text, dic):
@@ -170,10 +175,12 @@ def replace_all(text, dic):
     return text
 
 def main():
-  #if len(argv) > 1:
-  #  raise app.UsageError('Too many command-line arguments.')
-  data = read_data()
-  nlp(data)
+  if len(sys.argv) < 2:
+    raise Exception('nlp.py file_name.')
+  #data = read_csv()
+  #tweet_list_org = data.tweet # convert DF to list (tweets only) NOT a nested list
+  tweet_list_org = read_tweets_from_txt(sys.argv[1])
+  nlp(tweet_list_org)
 
 if __name__ == '__main__':
   main()
