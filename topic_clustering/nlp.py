@@ -150,7 +150,7 @@ def nlp(tweet_list_org):
     tw_clean_str = spell(" ".join(tw_clean_lst))
     #print("cleaned tweet = (", tw_clean_str, ")")
     #print("=" * 70)
-    cleaned_tw = re.sub(r",", " ", tweet)
+    cleaned_tw = re.sub(r',', r' ', str(tweet))
     OUTPUT_FILE.write("{},{},{}\n".format(counter, cleaned_tw, tw_clean_str))
     counter = counter + 1
   print("Write cleaned tweets into cleaned_tweets.csv.\r\n")
