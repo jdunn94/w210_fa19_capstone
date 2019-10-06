@@ -1,21 +1,26 @@
 import React, { useState } from "react";
-import "./search.css";
 
 import { makeStyles } from "@material-ui/core/styles";
 import blue from "@material-ui/core/colors/blue";
-import { TextField, Select, MenuItem, Divider, Paper } from "@material-ui/core";
+import {
+  TextField,
+  Select,
+  MenuItem,
+  Divider,
+  Paper,
+  Typography
+} from "@material-ui/core";
 import { data as mockData } from "./data";
 import Fab from "@material-ui/core/Fab";
 import SearchIcon from "@material-ui/icons/Search";
-import { MapViewer } from "../../components";
 
 const useStyles = makeStyles(theme => ({
-  searchPage: {
+  page: {
     display: "flex",
     "align-items": "center",
-    "justify-content": "center",
     "flex-grow": 1,
-    position: "relative"
+    position: "relative",
+    flexDirection: "column"
   },
   mapBackground: {
     height: "100%",
@@ -32,7 +37,7 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     position: "relative",
     "align-items": "center",
-    "justify-content": "center"
+    top: "5%"
   },
   searchForm: {
     display: "flex",
@@ -55,13 +60,35 @@ const useStyles = makeStyles(theme => ({
     bottom: "-20%",
     position: "absolute",
     width: "400px"
+  },
+  results: {
+    display: "flex",
+    flexDirection: "row",
+    position: "relative",
+    top: "15%",
+    width: "90%",
+    justifyContent: "space-evenly"
+  },
+  resultsBlock: {
+    width: "40%"
   }
 }));
 
-const Search = props => {
+const Results = props => {
   const classes = useStyles();
 
   const [state, updateState] = useState(mockData);
+
+  if (
+    props.match.location !== state.whereValue &&
+    props.match.topic !== state.whatValue
+  ) {
+    updateState({
+      ...state,
+      whereValue: props.match.location,
+      whatValue: props.match.topic
+    });
+  }
 
   const handleChange = name => event => {
     updateState({ ...state, [name]: event.target.value });
@@ -76,19 +103,18 @@ const Search = props => {
     props.history.push(`/results/${state.whereValue}/${state.whatValue}`);
   };
 
-  let searchBox = null;
-  if (state.showSearch) {
-    searchBox = (
+  return (
+    <div className={classes.page}>
       <Paper className={classes.searchBox}>
         <form className={classes.searchForm}>
           <TextField
             id="what"
             label="What's going on?"
             className={classes.textField}
-            value={state.nameValue}
+            value={state.whatValue}
             onChange={handleChange("whatValue")}
             margin="normal"
-            defaultValue={state.nameDefault}
+            defaultValue={state.whatDefault}
             variant="filled"
             inputProps={{
               className: classes.input
@@ -121,26 +147,27 @@ const Search = props => {
             <SearchIcon />
           </Fab>
         </form>
-        <Fab
-          variant="extended"
-          aria-label="explore"
-          className={classes.explore}
-          onClick={handleExplore}
-        >
-          Just Explore
-        </Fab>
       </Paper>
-    );
-  }
-
-  return (
-    <div className={classes.searchPage}>
-      {searchBox}
-      <div className={classes.mapBackground}>
-        <MapViewer hover={!state.showSearch} />
+      <div className={classes.results}>
+        <Paper className={classes.resultsBlock}>
+          <Typography>Top Matches</Typography>
+          <Typography>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut
+            dolor ut erat sodales elementum. Curabitur euismod, arcu ac
+            venenatis ornare, orci magna tristique ante, porta consectetur nulla
+            nulla sit amet purus. Sed elementum odio vel ligula mollis faucibus.
+            Praesent suscipit metus nec erat mattis faucibus. Nullam porta diam
+            arcu, id pulvinar urna auctor ultrices. Etiam venenatis sem ligula,
+            cursus aliquet nisi viverra quis. Nulla eget accumsan nunc. Praesent
+            feugiat scelerisque elit non pulvinar.
+          </Typography>
+        </Paper>
+        <Paper className={classes.resultsBlock}>
+          <Typography>Similar Topics</Typography>
+        </Paper>
       </div>
     </div>
   );
 };
 
-export default Search;
+export default Results;
