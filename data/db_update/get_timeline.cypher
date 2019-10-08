@@ -1,21 +1,14 @@
-MATCH (currentTweet:Tweet)
-WITH max(currentTweet.id) as max_id
+MATCH (target:User {screen_name:"CHP_SF"})
 CALL apoc.static.getAll("twitter") yield value AS twitter
-CALL apoc.load.jsonParams(twitter.search_url + "homeless&tweet_mode=extended&since_id="+0,{Authorization:"Bearer "+twitter.bearer},null) yield value
-UNWIND value.statuses as status
-WITH CASE WHEN (status.retweeted_status is not null) then [status.retweeted_status] else [] end as retweet_array, CASE WHEN (status.retweeted_status is null) then [status] else [] end as tweet_array, status.user as userData, status.id as id, status.created_at as created_at, CASE WHEN (status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as reply_array, CASE WHEN (status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as quote_reply_array, CASE WHEN (status.retweeted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_reply_array, CASE WHEN (status.retweeted_status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_quoted_reply_array
-
-MERGE (user:User {screen_name: userData.screen_name})
-ON CREATE SET user.id=userData.id, user.friend_count= userData.friends_count, user.favourites_count=userData.favourites_count, user.description=userData.description, user.screen_name = userData.screen_name, user.followers_count=userData.followers_count, user.location=userData.location, user.name = userData.name, user.created = userData.created_at
-ON MATCH SET user.id=userData.id, user.friend_count= userData.friends_count, user.favourites_count=userData.favourites_count, user.description=userData.description, user.followers_count=userData.followers_count, user.location=userData.location, user.name=userData.name, user.created = userData.created_at
-
+CALL apoc.load.jsonParams(twitter.user_timeline_url + "tweet_mode=extended&count=200&screen_name="+target.screen_name,{Authorization:"Bearer "+twitter.bearer},null) yield value as status
+WITH CASE WHEN (status.retweeted_status is not null) then [status.retweeted_status] else [] end as retweet_array, CASE WHEN (status.retweeted_status is null) then [status] else [] end as tweet_array, status.user as userData, status.id as id, status.created_at as created_at, CASE WHEN (status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as reply_array, CASE WHEN (status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as quote_reply_array, CASE WHEN (status.retweeted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_reply_array, CASE WHEN (status.retweeted_status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_quoted_reply_array, target
 
 FOREACH(tweet in tweet_array |
 	MERGE (t:Tweet {id: tweet.id})
 	ON CREATE SET t.id = tweet.id, t.text = tweet.full_text, t.urls = [u IN tweet.entities.urls | u.expanded_url], t.favorite_count = tweet.favorite_count, t.retweet_count = tweet.retweet_count, t.coordinates = tweet.coordinates.coordinates, t.place = tweet.place.full_name, t.created_at = tweet.created_at
 	ON MATCH SET t.text = tweet.full_text, t.urls = [u IN tweet.entities.urls | u.expanded_url], t.favorite_count = tweet.favorite_count, t.retweet_count = tweet.retweet_count, t.coordinates = tweet.coordinates.coordinates, t.place = tweet.place.full_name, t.created_at = tweet.created_at
 
-	MERGE (user)-[:TWEETED]->(t)
+	MERGE (target)-[:TWEETED]->(t)
   
 	FOREACH(hashtag in tweet.entities.hashtags | 
 		MERGE (tag:Hashtag {name: hashtag.text})
@@ -139,6 +132,6 @@ FOREACH(retweet in retweet_array |
 		MERGE (rt)-[:QUOTES]->(qt)
 	)
 	
-	MERGE  (user)-[:RETWEETED {retweet_id:id, retweet_created_at: created_at}]->(rt)
+	MERGE  (target)-[:RETWEETED {retweet_id:id, retweet_created_at: created_at}]->(rt)
 
 )
