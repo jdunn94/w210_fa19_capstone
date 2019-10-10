@@ -9,7 +9,8 @@
 /client/coverage
 # production
 /client/build
-
+#firebase
+.firebase
 # misc
 .DS_Store
 .env.local
