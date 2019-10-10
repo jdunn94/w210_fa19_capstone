@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
 import { Search, About, Results } from "./views";
 import Button from "@material-ui/core/Button";
@@ -32,7 +32,7 @@ function App() {
           <Switch>
             <Route path="/about" component={About} />
             <Route path="/results/:location/:topic" component={Results} />
-            <Route path="/" component={Search} />
+            <Route path="/:explore?" component={Search} />
           </Switch>
         </div>
       </Router>

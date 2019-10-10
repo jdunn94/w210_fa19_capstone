@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import blue from "@material-ui/core/colors/blue";
@@ -11,8 +11,11 @@ import {
   Typography
 } from "@material-ui/core";
 import { data as mockData } from "./data";
-import Fab from "@material-ui/core/Fab";
-import SearchIcon from "@material-ui/icons/Search";
+import { SearchBox } from "../../components";
+import { UserResultCard } from "./components";
+import CircularProgress from "@material-ui/core/CircularProgress";
+
+import { v1 as neo4j } from "neo4j-driver";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -22,150 +25,112 @@ const useStyles = makeStyles(theme => ({
     position: "relative",
     flexDirection: "column"
   },
-  mapBackground: {
-    height: "100%",
-    width: "100%",
-    position: "absolute",
-    zIndex: 0
-  },
   searchBox: {
-    padding: theme.spacing(3, 2),
-    width: "70vw",
-    height: "12vh",
-    "background-color": blue[500],
     zIndex: 100,
-    display: "flex",
-    position: "relative",
-    "align-items": "center",
-    top: "5%"
-  },
-  searchForm: {
-    display: "flex",
-    width: "100%",
-    "justify-content": "center"
-  },
-  textField: {
-    "background-color": "white",
-    width: "40%",
-    margin: theme.spacing(1)
-  },
-  input: {
-    "background-color": "white"
-  },
-  fab: {
-    margin: theme.spacing(1)
-  },
-  explore: {
-    zIndex: 1000,
-    bottom: "-20%",
-    position: "absolute",
-    width: "400px"
+    position: "sticky",
+    top: "10%",
+    paddingBottom: "50px"
   },
   results: {
     display: "flex",
     flexDirection: "row",
-    position: "relative",
-    top: "15%",
-    width: "90%",
+    paddingTop: "50px",
     justifyContent: "space-evenly"
   },
   resultsBlock: {
     width: "40%"
+  },
+  progress: {
+    margin: theme.spacing(2)
+  },
+  resultCard: {
+    margin: theme.spacing(3)
   }
 }));
 
 const Results = props => {
   const classes = useStyles();
 
-  const [state, updateState] = useState(mockData);
+  const [state, updateState] = useState([]);
+  const [isLoading, updateLoading] = useState(false);
 
-  if (
-    props.match.location !== state.whereValue &&
-    props.match.topic !== state.whatValue
-  ) {
-    updateState({
-      ...state,
-      whereValue: props.match.location,
-      whatValue: props.match.topic
-    });
-  }
+  useEffect(() => {
+    const driver = neo4j.driver(
+      // dev
+      //"bolt://34.70.225.97",
 
-  const handleChange = name => event => {
-    updateState({ ...state, [name]: event.target.value });
-  };
+      // pro
+      "bolt://35.194.58.33",
+
+      neo4j.auth.basic("guest", "guest")
+    );
+    const session = driver.session();
+    updateLoading(true);
+    session
+      .run(
+        `
+        match (u:User)-[:TWEETED]->(t:Tweet)
+        where t.text_lower contains("${props.match.params.topic}")
+        with u, count(t) as relevant_tweet_count, collect(t)[..10] as relevant_tweets
+        match (u)-[:TWEETED]->(t:Tweet)
+        return u as user, relevant_tweets, relevant_tweet_count, round(100*relevant_tweet_count/toFloat(count(t))) as pct
+        order by relevant_tweet_count desc,pct desc
+        limit 10
+      `
+      )
+      .then(results => {
+        // results.records.forEach(record => console.log(record.get("user")));
+        session.close();
+        driver.close();
+
+        updateLoading(false);
+        updateState(results.records);
+      });
+  }, [props.match.params.topic]);
 
   const handleExplore = event => {
-    updateState({ ...state, showSearch: !state.showSearch });
+    props.history.push(`/explore`);
   };
 
-  const handleSearch = event => {
-    event.preventDefault();
-    props.history.push(`/results/${state.whereValue}/${state.whatValue}`);
+  const handleSearch = (what, where) => {
+    props.history.push(`/results/${where}/${what}`);
   };
 
-  return (
-    <div className={classes.page}>
-      <Paper className={classes.searchBox}>
-        <form className={classes.searchForm}>
-          <TextField
-            id="what"
-            label="What's going on?"
-            className={classes.textField}
-            value={state.whatValue}
-            onChange={handleChange("whatValue")}
-            margin="normal"
-            defaultValue={state.whatDefault}
-            variant="filled"
-            inputProps={{
-              className: classes.input
-            }}
-          />
-          <Divider orientation="vertical" />
-          <Select
-            className={classes.textField}
-            value={state.whereValue}
-            onChange={handleChange("whereValue")}
-            name="Where?"
-            inputProps={{
-              name: "where",
-              id: "where"
-            }}
-          >
-            {state.whereOptions.map((a, i) => (
-              <MenuItem id={i} value={a}>
-                {a}
-              </MenuItem>
-            ))}
-          </Select>
-          <Fab
-            color="primary"
-            aria-label="search"
-            className={classes.fab}
-            onClick={handleSearch}
-            disabled={state.whereValue === "" || state.whatValue === ""}
-          >
-            <SearchIcon />
-          </Fab>
-        </form>
-      </Paper>
+  let resultBlock = null;
+  if (isLoading) {
+    resultBlock = (
       <div className={classes.results}>
-        <Paper className={classes.resultsBlock}>
+        <CircularProgress className={classes.progress} />
+      </div>
+    );
+  } else {
+    resultBlock = (
+      <div className={classes.results}>
+        <div className={classes.resultsBlock}>
           <Typography>Top Matches</Typography>
-          <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut
-            dolor ut erat sodales elementum. Curabitur euismod, arcu ac
-            venenatis ornare, orci magna tristique ante, porta consectetur nulla
-            nulla sit amet purus. Sed elementum odio vel ligula mollis faucibus.
-            Praesent suscipit metus nec erat mattis faucibus. Nullam porta diam
-            arcu, id pulvinar urna auctor ultrices. Etiam venenatis sem ligula,
-            cursus aliquet nisi viverra quis. Nulla eget accumsan nunc. Praesent
-            feugiat scelerisque elit non pulvinar.
-          </Typography>
-        </Paper>
+          {state.map((userResult, i) => (
+            <div key={i} className={classes.resultCard}>
+              <UserResultCard data={userResult}/>
+            </div>
+          ))}
+        </div>
         <Paper className={classes.resultsBlock}>
           <Typography>Similar Topics</Typography>
         </Paper>
       </div>
+    );
+  }
+  return (
+    <div className={classes.page}>
+      <div className={classes.searchBox}>
+        <SearchBox
+          handleExplore={handleExplore}
+          handleSearch={handleSearch}
+          whatValue={props.match.params.topic}
+          whereValue={props.match.params.location}
+        />
+      </div>
+      {resultBlock}
     </div>
   );
 };
