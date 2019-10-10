@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import blue from "@material-ui/core/colors/blue";
-import {
-  TextField,
-  Select,
-  MenuItem,
-  Divider,
-  Paper,
-  Typography
-} from "@material-ui/core";
-import { data as mockData } from "./data";
+import { Typography } from "@material-ui/core";
+
 import { SearchBox } from "../../components";
-import { UserResultCard } from "./components";
+import { UserResultCard, HashtagResultCard } from "./components";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { v1 as neo4j } from "neo4j-driver";
@@ -33,25 +25,36 @@ const useStyles = makeStyles(theme => ({
   },
   results: {
     display: "flex",
-    flexDirection: "row",
-    paddingTop: "50px",
-    justifyContent: "space-evenly"
+    flexDirection: "column",
+    paddingTop: "50px"
   },
-  resultsBlock: {
-    width: "40%"
+  userResults: {
+    width: "70%"
+  },
+  hashtagResults: {
+    width: "25%",
+    margin: theme.spacing(3)
   },
   progress: {
     margin: theme.spacing(2)
   },
   resultCard: {
     margin: theme.spacing(3)
+  },
+  resultBlocks: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly"
+  },
+  resultsHeader: {
+    textAlign: "center"
   }
 }));
 
 const Results = props => {
   const classes = useStyles();
 
-  const [state, updateState] = useState([]);
+  const [state, updateState] = useState([[], []]);
   const [isLoading, updateLoading] = useState(false);
 
   useEffect(() => {
@@ -66,7 +69,7 @@ const Results = props => {
     );
     const session = driver.session();
     updateLoading(true);
-    session
+    const userResults = session
       .run(
         `
         match (u:User)-[:TWEETED]->(t:Tweet)
@@ -79,13 +82,31 @@ const Results = props => {
       `
       )
       .then(results => {
-        // results.records.forEach(record => console.log(record.get("user")));
-        session.close();
-        driver.close();
-
-        updateLoading(false);
-        updateState(results.records);
+        return results.records;
       });
+
+    const hashtagResults = session
+      .run(
+        `
+        match (u:User)-[:TWEETED]->(t:Tweet)-[:TAGGED]->(h:Hashtag)
+        where t.text_lower contains("${props.match.params.topic}")
+        with distinct h.name as name, count(h.name) as counts
+        where counts > 1
+        return name, counts
+        order by counts desc
+        limit 100
+      `
+      )
+      .then(results => {
+        return results.records;
+      });
+
+    Promise.all([userResults, hashtagResults]).then(results => {
+      updateState(results);
+      updateLoading(false);
+      session.close();
+      driver.close();
+    });
   }, [props.match.params.topic]);
 
   const handleExplore = event => {
@@ -95,6 +116,14 @@ const Results = props => {
   const handleSearch = (what, where) => {
     props.history.push(`/results/${where}/${what}`);
   };
+
+  const navigateUser = (id) => {
+    props.history.push(`/user/${id}`)
+  }
+
+  const navigateHashtag = (name) => {
+    props.history.push(`/hashtag/${name}`)
+  }
 
   let resultBlock = null;
   if (isLoading) {
@@ -106,17 +135,19 @@ const Results = props => {
   } else {
     resultBlock = (
       <div className={classes.results}>
-        <div className={classes.resultsBlock}>
-          <Typography>Top Matches</Typography>
-          {state.map((userResult, i) => (
-            <div key={i} className={classes.resultCard}>
-              <UserResultCard data={userResult}/>
-            </div>
-          ))}
+        <Typography className={classes.resultsHeader} variant="h5">Search results</Typography>
+        <div className={classes.resultBlocks}>
+          <div className={classes.userResults}>
+            {state[0].map((userResult, i) => (
+              <div key={i} className={classes.resultCard}>
+                <UserResultCard data={userResult} navigateUser={navigateUser}/>
+              </div>
+            ))}
+          </div>
+          <div className={classes.hashtagResults}>
+            <HashtagResultCard data={state[1]} navigateHashtag={navigateHashtag} />
+          </div>
         </div>
-        <Paper className={classes.resultsBlock}>
-          <Typography>Similar Topics</Typography>
-        </Paper>
       </div>
     );
   }

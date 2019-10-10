@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import blue from "@material-ui/core/colors/blue";
-import { TextField, Select, MenuItem, Divider, Paper } from "@material-ui/core";
+import {blue} from "@material-ui/core/colors";
+import { TextField, Select, MenuItem, Divider, Paper, Fab } from "@material-ui/core";
 import { data as mockData } from "./data";
-import Fab from "@material-ui/core/Fab";
 import SearchIcon from "@material-ui/icons/Search";
 
 const useStyles = makeStyles(theme => ({
   searchBox: {
-    padding: theme.spacing(3, 2),
+    padding: theme.spacing(1, 2, 3),
     width: "70vw",
     height: "12vh",
     "background-color": blue[500],
