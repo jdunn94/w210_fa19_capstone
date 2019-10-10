@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
 import time
 
-uri = "bolt://localhost:7687"
+uri = "bolt://192.168.1.1:7687"
 driver = GraphDatabase.driver(uri, auth=("neo4j", "mcai2019"))
 
 update_script = ""
