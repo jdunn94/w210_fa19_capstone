@@ -1,6 +1,8 @@
 MATCH (stubUsers:User)
 WHERE stubUsers.followers_count is null
-WITH collect(stubUsers.id)[..100] as user_ids
+with stubUsers.id as ids
+order by ids desc
+WITH collect(ids)[..100] as user_ids
 WITH REDUCE(s = HEAD(user_ids), n IN TAIL(user_ids) | s + ',' + n) AS result
 CALL apoc.static.getAll("twitter") yield value AS twitter
 CALL apoc.load.jsonParams(twitter.users_list_url + "user_id="+result,{Authorization:"Bearer "+twitter.bearer},null) yield value
