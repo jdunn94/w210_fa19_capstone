@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
-import { Search, About } from "./views";
+import { Search, About, Results, User, Hashtag } from "./views";
 import Button from "@material-ui/core/Button";
 
 import {
@@ -14,7 +14,6 @@ function App() {
   const Link = React.forwardRef((props, ref) => (
     <RouterLink innerRef={ref} {...props} />
   ));
-  const [showSearch, updateState] = useState(false);
 
   return (
     <div className="App">
@@ -31,12 +30,11 @@ function App() {
             renders the first one that matches the current URL. */}
         <div className="App-main">
           <Switch>
-            <Route path="/about">
-              <About />
-            </Route>
-            <Route path="/">
-              <Search />
-            </Route>
+            <Route path="/about" component={About} />
+            <Route path="/results/:location/:topic" component={Results} />
+            <Route path="/user/:id/" component={User} />
+            <Route path="/hashtag/:name/" component={Hashtag} />
+            <Route path="/:explore?" component={Search} />
           </Switch>
         </div>
       </Router>

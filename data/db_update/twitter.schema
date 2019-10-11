@@ -1,0 +1,248 @@
+{
+  "Hashtag": {
+    "count": 116,
+    "relationships": {
+      "TAGGED": {
+        "count": 368,
+        "properties": {
+
+        },
+        "direction": "in",
+        "labels": [
+          "Tweet"
+        ]
+      }
+    },
+    "type": "node",
+    "properties": {
+      "name": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      }
+    },
+    "labels": []
+  },
+  "TAGGED": {
+    "type": "relationship",
+    "count": 186,
+    "properties": {
+
+    }
+  },
+  "User": {
+    "count": 2271,
+    "relationships": {
+      "MENTIONS": {
+        "count": 1369,
+        "properties": {
+
+        },
+        "direction": "in",
+        "labels": [
+          "Tweet"
+        ]
+      },
+      "TWEETED": {
+        "count": 2234,
+        "properties": {
+
+        },
+        "direction": "out",
+        "labels": [
+          "Tweet"
+        ]
+      }
+    },
+    "type": "node",
+    "properties": {
+      "screen_name": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "created": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "followers_count": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      },
+      "favourites_count": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      },
+      "name": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "description": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "location": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "id": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      },
+      "friend_count": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      }
+    },
+    "labels": []
+  },
+  "Tweet": {
+    "count": 2234,
+    "relationships": {
+      "TAGGED": {
+        "count": 362,
+        "properties": {
+
+        },
+        "direction": "out",
+        "labels": [
+          "Hashtag"
+        ]
+      },
+      "REPLY_TO": {
+        "count": 181,
+        "properties": {
+
+        },
+        "direction": "out",
+        "labels": [
+          "Tweet",
+          "Tweet"
+        ]
+      },
+      "MENTIONS": {
+        "count": 10005,
+        "properties": {
+
+        },
+        "direction": "out",
+        "labels": [
+          "User"
+        ]
+      },
+      "TWEETED": {
+        "count": 2988,
+        "properties": {
+
+        },
+        "direction": "in",
+        "labels": [
+          "User"
+        ]
+      },
+      "RETWEETED": {
+        "count": 8402,
+        "properties": {
+
+        },
+        "direction": "out",
+        "labels": [
+          "Tweet",
+          "Tweet"
+        ]
+      }
+    },
+    "type": "node",
+    "properties": {
+      "urls": {
+        "existence": false,
+        "type": "LIST",
+        "indexed": false,
+        "unique": false
+      },
+      "created_at": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "favorite_count": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      },
+      "text": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "id": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      },
+      "place": {
+        "existence": false,
+        "type": "STRING",
+        "indexed": false,
+        "unique": false
+      },
+      "retweet_count": {
+        "existence": false,
+        "type": "INTEGER",
+        "indexed": false,
+        "unique": false
+      }
+    },
+    "labels": []
+  },
+  "RETWEETED": {
+    "type": "relationship",
+    "count": 1029,
+    "properties": {
+
+    }
+  },
+  "REPLY_TO": {
+    "type": "relationship",
+    "count": 222,
+    "properties": {
+
+    }
+  },
+  "MENTIONS": {
+    "type": "relationship",
+    "count": 1633,
+    "properties": {
+
+    }
+  },
+  "TWEETED": {
+    "type": "relationship",
+    "count": 2234,
+    "properties": {
+
+    }
+  }
+}
