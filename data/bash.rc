@@ -1,0 +1,8 @@
+#!/bin/bash
+
+FILES=json_results/*
+for i in $FILES
+do
+	gsutil cp $i gs://mic-check-ai/data/json_results/
+	mv $i stored_json_results
+done
