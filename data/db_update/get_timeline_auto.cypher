@@ -1,22 +1,20 @@
-MATCH (stubTweets:Tweet)
-WHERE stubTweets.created_at is null
-WITH collect(stubTweets.id)[..100] as tweet_ids
-WITH REDUCE(s = HEAD(tweet_ids), n IN TAIL(tweet_ids) | s + ',' + n) AS result
+MATCH (u:User)
+WITH u, SIZE((u)-[:TWEETED]->(:Tweet)) as tc
+where tc > 10
+with u
+order by tc asc
+with collect(u)[..5] as users
+unwind users as target
 CALL apoc.static.getAll("twitter") yield value AS twitter
-CALL apoc.load.jsonParams(twitter.status_lookup_url + "tweet_mode=extended&id="+result,{Authorization:"Bearer "+twitter.bearer},null) yield value as status
-WITH CASE WHEN (status.retweeted_status is not null) then [status.retweeted_status] else [] end as retweet_array, CASE WHEN (status.retweeted_status is null) then [status] else [] end as tweet_array, status.user as userData, status.id as id, status.created_at as created_at, CASE WHEN (status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as reply_array, CASE WHEN (status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as quote_reply_array, CASE WHEN (status.retweeted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_reply_array, CASE WHEN (status.retweeted_status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_quoted_reply_array
-
-MERGE (user:User {screen_name: userData.screen_name})
-ON CREATE SET user.id=userData.id, user.friend_count= userData.friends_count, user.favourites_count=userData.favourites_count, user.description=userData.description, user.screen_name = userData.screen_name, user.followers_count=userData.followers_count, user.location=userData.location, user.name = userData.name, user.created = userData.created_at
-ON MATCH SET user.id=userData.id, user.friend_count= userData.friends_count, user.favourites_count=userData.favourites_count, user.description=userData.description, user.followers_count=userData.followers_count, user.location=userData.location, user.name=userData.name, user.created = userData.created_at
-
+CALL apoc.load.jsonParams(twitter.user_timeline_url + "tweet_mode=extended&count=200&screen_name="+target.screen_name,{Authorization:"Bearer "+twitter.bearer},null) yield value as status
+WITH CASE WHEN (status.retweeted_status is not null) then [status.retweeted_status] else [] end as retweet_array, CASE WHEN (status.retweeted_status is null) then [status] else [] end as tweet_array, status.user as userData, status.id as id, status.created_at as created_at, CASE WHEN (status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as reply_array, CASE WHEN (status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as quote_reply_array, CASE WHEN (status.retweeted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_reply_array, CASE WHEN (status.retweeted_status.quoted_status.in_reply_to_status_id is not null) THEN ['ok'] ELSE [] END as retweet_quoted_reply_array, target
 
 FOREACH(tweet in tweet_array |
 	MERGE (t:Tweet {id: tweet.id})
 	ON CREATE SET t.id = tweet.id, t.text = tweet.full_text, t.urls = [u IN tweet.entities.urls | u.expanded_url], t.favorite_count = tweet.favorite_count, t.retweet_count = tweet.retweet_count, t.coordinates = tweet.coordinates.coordinates, t.place = tweet.place.full_name, t.created_at = tweet.created_at
 	ON MATCH SET t.text = tweet.full_text, t.urls = [u IN tweet.entities.urls | u.expanded_url], t.favorite_count = tweet.favorite_count, t.retweet_count = tweet.retweet_count, t.coordinates = tweet.coordinates.coordinates, t.place = tweet.place.full_name, t.created_at = tweet.created_at
 
-	MERGE (user)-[:TWEETED]->(t)
+	MERGE (target)-[:TWEETED]->(t)
   
 	FOREACH(hashtag in tweet.entities.hashtags | 
 		MERGE (tag:Hashtag {name: hashtag.text})
@@ -41,8 +39,8 @@ FOREACH(tweet in tweet_array |
 
 	FOREACH(quote in CASE WHEN (tweet.quoted_status is not null) THEN [tweet.quoted_status] ELSE [] end |
 		MERGE (qt:Tweet {id: quote.id})
-		ON CREATE SET qt.id = quote.id, qt.text = quote.full_text, qt.urls = quote.urls, qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
-		ON MATCH SET qt.text = quote.full_text, qt.urls = quote.urls, qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
+		ON CREATE SET qt.id = quote.id, qt.text = quote.full_text, qt.urls = [u IN quote.entities.urls | u.expanded_url], qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
+		ON MATCH SET qt.text = quote.full_text, qt.urls = [u IN quote.entities.urls | u.expanded_url], qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
 
 		FOREACH(hashtag in qt.entities.hashtags | 
 			MERGE (tag:Hashtag {name: hashtag.text})
@@ -77,8 +75,8 @@ FOREACH(tweet in tweet_array |
 
 FOREACH(retweet in retweet_array | 
 	MERGE (rt:Tweet {id: retweet.id})
-	ON CREATE SET rt.id = retweet.id, rt.text = retweet.full_text, rt.urls = retweet.urls, rt.favorite_count = retweet.favorite_count, rt.retweet_count = retweet.retweet_count, rt.coordinates = retweet.coordinates.coordinates, rt.place = retweet.place.full_name
-	ON MATCH SET rt.full_text = retweet.text, rt.urls = retweet.urls, rt.favorite_count = retweet.favorite_count, rt.retweet_count = retweet.retweet_count, rt.coordinates = retweet.coordinates.coordinates, rt.place = retweet.place.full_name
+	ON CREATE SET rt.id = retweet.id, rt.text = retweet.full_text, rt.urls = [u IN retweet.entities.urls | u.expanded_url], rt.favorite_count = retweet.favorite_count, rt.retweet_count = retweet.retweet_count, rt.coordinates = retweet.coordinates.coordinates, rt.place = retweet.place.full_name
+	ON MATCH SET rt.full_text = retweet.text, rt.urls = [u IN retweet.entities.urls | u.expanded_url], rt.favorite_count = retweet.favorite_count, rt.retweet_count = retweet.retweet_count, rt.coordinates = retweet.coordinates.coordinates, rt.place = retweet.place.full_name
 
 	FOREACH(hashtag in retweet.entities.hashtags | 
 		MERGE (tag:Hashtag {name: hashtag.text})
@@ -108,8 +106,8 @@ FOREACH(retweet in retweet_array |
 	
 	FOREACH(quote in CASE WHEN (retweet.quoted_status is not null) THEN [retweet.quoted_status] ELSE [] end |
 		MERGE (qt:Tweet {id: quote.id})
-		ON CREATE SET qt.id = quote.id, qt.text = quote.full_text, qt.urls = quote.urls, qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
-		ON MATCH SET qt.text = quote.full_text, qt.urls = quote.urls, qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
+		ON CREATE SET qt.id = quote.id, qt.text = quote.full_text, qt.urls = [u IN quote.entities.urls | u.expanded_url], qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
+		ON MATCH SET qt.text = quote.full_text, qt.urls = [u IN quote.entities.urls | u.expanded_url], qt.favorite_count = quote.favorite_count, qt.retweet_count = quote.retweet_count, qt.coordinates = quote.coordinates.coordinates, qt.place = quote.place.full_name
 
 		FOREACH(hashtag in qt.entities.hashtags | 
 			MERGE (tag:Hashtag {name: hashtag.text})
@@ -140,6 +138,6 @@ FOREACH(retweet in retweet_array |
 		MERGE (rt)-[:QUOTES]->(qt)
 	)
 	
-	MERGE  (user)-[:RETWEETED {retweet_id:id, retweet_created_at: created_at}]->(rt)
+	MERGE  (target)-[:RETWEETED {retweet_id:id, retweet_created_at: created_at}]->(rt)
 
 )
