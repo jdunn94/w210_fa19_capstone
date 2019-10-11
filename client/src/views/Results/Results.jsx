@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
@@ -7,7 +7,7 @@ import { SearchBox } from "../../components";
 import { UserResultCard, HashtagResultCard } from "./components";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-import { v1 as neo4j } from "neo4j-driver";
+import { Neo4jContext } from "../../services";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -53,23 +53,15 @@ const useStyles = makeStyles(theme => ({
 
 const Results = props => {
   const classes = useStyles();
+  const driver = useContext(Neo4jContext);
 
-  const [state, updateState] = useState([[], []]);
-  const [isLoading, updateLoading] = useState(false);
+  const [users, updateUsers] = useState([]);
+  const [isUsersLoading, updateUsersLoading] = useState(false);
 
   useEffect(() => {
-    const driver = neo4j.driver(
-      // dev
-      //"bolt://34.70.225.97",
-
-      // pro
-      "bolt://35.194.58.33",
-
-      neo4j.auth.basic("guest", "guest")
-    );
     const session = driver.session();
-    updateLoading(true);
-    const userResults = session
+    updateUsersLoading(true);
+    const results = session
       .run(
         `
         match (u:User)-[:TWEETED]->(t:Tweet)
@@ -81,11 +73,31 @@ const Results = props => {
         limit 10
       `
       )
-      .then(results => {
-        return results.records;
+      .subscribe({
+        onKeys: keys => {
+          console.log("keys");
+          console.log(keys);
+        },
+        onNext: record => {
+          updateUsers(oldUsers => [...oldUsers,record]);
+        },
+        onCompleted: () => {
+          updateUsersLoading(false)
+          session.close(); // returns a Promise
+        },
+        onError: error => {
+          console.log(error);
+        }
       });
+  }, [props.match.params.topic]);
 
-    const hashtagResults = session
+  const [hashtags, updateHashtags] = useState([]);
+  const [isHashtagsLoading, updateHashtagsLoading] = useState(false);
+
+  useEffect(() => {
+    const session = driver.session();
+    updateHashtagsLoading(true);
+    const results = session
       .run(
         `
         match (u:User)-[:TWEETED]->(t:Tweet)-[:TAGGED]->(h:Hashtag)
@@ -97,16 +109,57 @@ const Results = props => {
         limit 100
       `
       )
-      .then(results => {
-        return results.records;
+      .subscribe({
+        onKeys: keys => {
+          console.log("keys")
+          console.log(keys);
+        },
+        onNext: record => {
+          updateHashtags(oldHashtags => [...oldHashtags, record])
+        },
+        onCompleted: () => {
+          updateHashtagsLoading(false);
+          session.close(); // returns a Promise
+        },
+        onError: error => {
+          console.log(error);
+        }
       });
+  }, [props.match.params.topic]);
 
-    Promise.all([userResults, hashtagResults]).then(results => {
-      updateState(results);
-      updateLoading(false);
-      session.close();
-      driver.close();
-    });
+  const [tweets, updateTweets] = useState([]);
+  const [isTweetsLoading, updateTweetsLoading] = useState(false);
+
+  useEffect(() => {
+    const session = driver.session();
+    updateTweetsLoading(true);
+    const results = session
+      .run(
+        `
+        match (u:User)-[:TWEETED]->(t:Tweet)-[:TAGGED]->(h:Hashtag)
+        where t.text_lower contains("${props.match.params.topic}")
+        with distinct h.name as name, count(h.name) as counts
+        where counts > 1
+        return name, counts
+        order by counts desc
+        limit 100
+      `
+      )
+      .subscribe({
+        onKeys: keys => {
+          console.log(keys);
+        },
+        onNext: record => {
+          //console.log(record.get("name"));
+        },
+        onCompleted: () => {
+          updateTweetsLoading(false);
+          session.close(); // returns a Promise
+        },
+        onError: error => {
+          console.log(error);
+        }
+      });
   }, [props.match.params.topic]);
 
   const handleExplore = event => {
@@ -117,16 +170,16 @@ const Results = props => {
     props.history.push(`/results/${where}/${what}`);
   };
 
-  const navigateUser = (id) => {
-    props.history.push(`/user/${id}`)
-  }
+  const navigateUser = id => {
+    props.history.push(`/user/${id}`);
+  };
 
-  const navigateHashtag = (name) => {
-    props.history.push(`/hashtag/${name}`)
-  }
+  const navigateHashtag = name => {
+    props.history.push(`/hashtag/${name}`);
+  };
 
   let resultBlock = null;
-  if (isLoading) {
+  if (isUsersLoading || isHashtagsLoading || isTweetsLoading) {
     resultBlock = (
       <div className={classes.results}>
         <CircularProgress className={classes.progress} />
@@ -135,17 +188,22 @@ const Results = props => {
   } else {
     resultBlock = (
       <div className={classes.results}>
-        <Typography className={classes.resultsHeader} variant="h5">Search results</Typography>
+        <Typography className={classes.resultsHeader} variant="h5">
+          Search results
+        </Typography>
         <div className={classes.resultBlocks}>
           <div className={classes.userResults}>
-            {state[0].map((userResult, i) => (
+            {users.map((userResult, i) => (
               <div key={i} className={classes.resultCard}>
-                <UserResultCard data={userResult} navigateUser={navigateUser}/>
+                <UserResultCard data={userResult} navigateUser={navigateUser} />
               </div>
             ))}
           </div>
           <div className={classes.hashtagResults}>
-            <HashtagResultCard data={state[1]} navigateHashtag={navigateHashtag} />
+            <HashtagResultCard
+              data={hashtags}
+              navigateHashtag={navigateHashtag}
+            />
           </div>
         </div>
       </div>

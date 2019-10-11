@@ -1,6 +1,6 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Paper, Typography } from "@material-ui/core";
+import { Paper, Typography, Button } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -17,6 +17,14 @@ const useStyles = makeStyles(theme => ({
   },
   pos: {
     marginBottom: 12
+  },
+  button: {
+    textTransform: "none"
+  },
+  buttonPanel: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "baseline"
   }
 }));
 
@@ -24,7 +32,7 @@ const HashtagResultCard = props => {
   const classes = useStyles();
 
   const handleClick = event => {
-    props.navigateHashtag(event.target.id);
+    props.navigateHashtag(event.currentTarget.id);
   };
 
   return (
@@ -32,11 +40,19 @@ const HashtagResultCard = props => {
       <Typography variant="h5" component="h3" gutterBottom>
         Common hashtags:
       </Typography>
-      {props.data.map((ht, i) => (
-        <Typography component="p" key={i} id={ht.get("name")} onClick={handleClick}>
-          {ht.get("name")} {ht.get("counts").toString()}
-        </Typography>
-      ))}
+      <div className={classes.buttonPanel}>
+        {props.data.map((ht, i) => (
+          <Button
+            className={classes.button}
+            size="small"
+            key={i}
+            id={ht.get("name")}
+            onClick={handleClick}
+          >
+            {ht.get("name")} {ht.get("counts").toString()}
+          </Button>
+        ))}
+      </div>
     </Paper>
   );
 };

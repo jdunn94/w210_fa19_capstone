@@ -27,7 +27,7 @@ const useStyles = makeStyles({
   },
   userInfo: {
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "row"
   },
   userInfoBlock: {
     display: "flex",
@@ -35,7 +35,7 @@ const useStyles = makeStyles({
     width: "350px"
   },
   keyValueText: {
-    display: "flex",
+    display: "flex"
   }
 });
 
@@ -54,9 +54,9 @@ const UserResultCard = props => {
         </Typography>
         <div className={classes.keyValueText}>
           <Typography variant="subtitle2" gutterBottom>
-            Name: 
+            Name:
           </Typography>
-          <div style={{width: "3px"}} />
+          <div style={{ width: "3px" }} />
           <Typography variant="body2" component="p">
             {props.data.get("user").properties.name}
           </Typography>
@@ -69,7 +69,7 @@ const UserResultCard = props => {
         <div className={classes.userInfo}>
           <div className={classes.userInfoBlock}>
             <Typography variant="body2" component="p">
-              Relevant tweets:{" "}
+              Relevant tweets:
               {props.data.get("relevant_tweet_count").toString()}
             </Typography>
             <Typography variant="body2" component="p">
@@ -83,12 +83,16 @@ const UserResultCard = props => {
           </div>
           <div className={classes.userInfoBlock}>
             <Typography variant="body2" component="p">
-              Followers count:{" "}
-              {props.data.get("user").properties.followers_count.toString()}
+              Followers count:
+              {!!props.data.get("user").properties.followers_count
+                ? props.data.get("user").properties.followers_count.toString()
+                : "n/a"}
             </Typography>
             <Typography variant="body2" component="p">
-              Friend count:{" "}
-              {props.data.get("user").properties.friend_count.toString()}
+              Friend count:
+              {!!props.data.get("user").properties.friend_count
+                ? props.data.get("user").properties.friend_count.toString()
+                : "n/a"}
             </Typography>
             <Typography variant="body2" component="p">
               Account created on: {props.data.get("user").properties.created}
