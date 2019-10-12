@@ -39,20 +39,36 @@ const useStyles = makeStyles({
   }
 });
 
-const UserResultCard = props => {
+const TweetResultCard = props => {
   const classes = useStyles();
 
   const handleClick = event => {
-    props.navigateTweet(props.data.get("user").properties.id);
+    props.navigateTweet(props.data.get("t").properties.id.toString());
   };
 
-  console.log(props.data)
   return (
     <Card className={classes.card}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Test
+          {props.data.get("user").properties.screen_name}: {props.data.get("t").properties.created_at || "n/a creation"}
         </Typography>
+        <Typography className={classes.quotedTweet} gutterBottom>
+          {props.data.get("t").properties.text}
+        </Typography>
+        <div>
+          <Typography variant="body2" component="p">
+            Favorite Count:{" "}
+            {!!props.data.get("t").properties.favorite_count
+              ? props.data.get("t").properties.favorite_count.toString()
+              : "n/a"}
+          </Typography>
+          <Typography variant="body2" component="p">
+            Retweet Count:{" "}
+            {!!props.data.get("t").properties.retweet_count
+              ? props.data.get("t").properties.retweet_count.toString()
+              : "n/a"}
+          </Typography>
+        </div>
       </CardContent>
       <CardActions>
         <Button size="small" onClick={handleClick}>
@@ -63,4 +79,4 @@ const UserResultCard = props => {
   );
 };
 
-export default UserResultCard;
+export default TweetResultCard;

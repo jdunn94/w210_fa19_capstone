@@ -13,6 +13,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column"
   },
   resultCard: {
+    minHeight: "100px",
     margin: theme.spacing(2)
   }
 }));
@@ -68,7 +69,11 @@ const TweetResultBlock = props => {
   return (
     <div className={classes.results}>
       {isTweetsLoading ? (
-        <Skeleton />
+        <div>
+          <Skeleton variant="rect" className={classes.resultCard} />
+          <Skeleton variant="rect" className={classes.resultCard} />
+          <Skeleton variant="rect" className={classes.resultCard} />
+        </div>
       ) : (
         tweets.map((userResult, i) => (
           <div key={i} className={classes.resultCard}>

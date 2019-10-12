@@ -10,10 +10,11 @@ import { Neo4jContext } from "../../../../services";
 const useStyles = makeStyles(theme => ({
   results: {
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column"
   },
   resultCard: {
-    margin: theme.spacing(2)
+    margin: theme.spacing(2),
+    minHeight: "250px"
   }
 }));
 
@@ -65,7 +66,10 @@ const UserResultBlock = props => {
   return (
     <div className={classes.results}>
       {isUsersLoading ? (
-        <Skeleton variant="rect" width="" />
+        <div>
+          <Skeleton variant="rect" className={classes.resultCard} />
+          <Skeleton variant="rect" className={classes.resultCard} />
+        </div>
       ) : (
         users.map((userResult, i) => (
           <div key={i} className={classes.resultCard}>

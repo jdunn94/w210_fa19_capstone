@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
@@ -9,9 +9,6 @@ import {
   HashtagResultBlock,
   TweetResultBlock
 } from "./components";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
-import { Neo4jContext } from "../../services";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -30,7 +27,7 @@ const useStyles = makeStyles(theme => ({
   resultsSection: {
     width: "100%",
     height: "100%",
-    paddingTop: "50px"
+    paddingTop: "25px"
   },
   resultsHeader: {
     textAlign: "center"
@@ -78,14 +75,14 @@ const Results = props => {
           Search results
         </Typography>
         <div className={classes.hashtagResults}>
-          <HashtagResultBlock topic={props.match.params.topic} />
+          <HashtagResultBlock topic={props.match.params.topic} history={props.history} />
         </div>
         <div className={classes.resultsColumns}>
           <div className={classes.userResults}>
-            <UserResultBlock topic={props.match.params.topic} />
+            <UserResultBlock topic={props.match.params.topic} history={props.history} />
           </div>
           <div className={classes.tweetResults}>
-            <TweetResultBlock topic={props.match.params.topic} />
+            <TweetResultBlock topic={props.match.params.topic} history={props.history}/>
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
   searchBox: {
     padding: theme.spacing(1, 2, 3),
     width: "70vw",
-    height: "12vh",
+    height: "9vh",
     "background-color": blue[500],
     zIndex: 100,
     display: "flex",
@@ -36,8 +36,12 @@ const useStyles = makeStyles(theme => ({
   },
   explore: {
     zIndex: 1000,
-    bottom: "-10%",
+    bottom: "-20%",
     position: "absolute",
+    width: "400px",
+    height:"36px"
+  },
+  test: {
     width: "400px"
   }
 }));
