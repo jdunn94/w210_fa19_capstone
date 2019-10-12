@@ -6,7 +6,7 @@ import time
 JSON_PATH = "/graph_data/data/json_results"
 ETL_QUERIES_PATH = "../etl_queries"
 MAX_IMPORTS = 100
-SLEEP = 500
+SLEEP = 300
 
 uri = "bolt://localhost:7687"
 driver = GraphDatabase.driver(uri, auth=("neo4j", "mcai2019"))
@@ -37,16 +37,5 @@ for file in files:
                                     'import_json.cypher'), {'url':"file:///" + file_path,'json_file':file[1]})
     print(f"Completed import: {file_path}")
     import_count += 1
-
-run_script(driver, os.path.join(ETL_QUERIES_PATH, 'more_tweet_info.cypher'))
-try:
-    run_script(driver, os.path.join(ETL_QUERIES_PATH, 'more_user_info.cypher'))
-except:
-    print(f"More user info failed")
-
-run_script(driver, os.path.join(
-ETL_QUERIES_PATH, 'add_tweet_text_lower.cypher'))
-
-
 
 driver.close()
