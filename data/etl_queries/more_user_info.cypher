@@ -1,7 +1,6 @@
 MATCH (stubUsers:User)
 WHERE stubUsers.followers_count is null
 with stubUsers.id as ids
-order by ids desc
 WITH collect(ids)[..100] as user_ids
 WITH REDUCE(s = HEAD(user_ids), n IN TAIL(user_ids) | s + ',' + n) AS result
 CALL apoc.static.getAll("twitter") yield value AS twitter

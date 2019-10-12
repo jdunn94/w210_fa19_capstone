@@ -1,7 +1,6 @@
 MATCH (stubTweets:Tweet)
 WHERE stubTweets.created_at is null
 with stubTweets.id as ids
-order by ids desc
 WITH collect(ids)[..100] as tweet_ids
 WITH REDUCE(s = HEAD(tweet_ids), n IN TAIL(tweet_ids) | s + ',' + n) AS result
 CALL apoc.static.getAll("twitter") yield value AS twitter
