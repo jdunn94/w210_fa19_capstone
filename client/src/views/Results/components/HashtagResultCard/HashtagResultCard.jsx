@@ -1,6 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Paper, Typography, Button } from "@material-ui/core";
+import {
+  Paper,
+  Typography,
+  Chip,
+  CardActions,
+  Button
+} from "@material-ui/core";
+import { blue } from "@material-ui/core/colors";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -25,34 +32,65 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "baseline"
+  },
+  chips: {
+    display: "flex",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    "& > *": {
+      margin: theme.spacing(0.5)
+    }
   }
 }));
 
 const HashtagResultCard = props => {
   const classes = useStyles();
 
+  const [state, updateState] = useState(20);
+
+  const showAll = event => {
+    updateState(100000);
+  };
   const handleClick = event => {
     props.navigateHashtag(event.currentTarget.id);
   };
 
+  const getColor = (max, current) => {
+    const paletteNumber = Math.round(4 * (Number(current) / Number(max))) * 100;
+    return blue[paletteNumber === 0 ? 50 : paletteNumber];
+  };
+
   return (
     <Paper className={classes.card}>
-      <Typography variant="h5" component="h3" gutterBottom>
-        Common hashtags:
-      </Typography>
-      <div className={classes.buttonPanel}>
-        {props.data.map((ht, i) => (
-          <Button
-            className={classes.button}
-            size="small"
+      <div className={classes.chips}>
+        {props.data.slice(0, state).map((ht, i) => (
+          <Chip
+            style={{
+              backgroundColor: getColor(
+                props.data[0].get("counts").toString(),
+                ht.get("counts").toString()
+              )
+            }}
             key={i}
+            size="small"
             id={ht.get("name")}
             onClick={handleClick}
-          >
-            {ht.get("name")} {ht.get("counts").toString()}
-          </Button>
+            label={`${ht.get("name")} ${ht.get("counts").toString()}`}
+          />
         ))}
       </div>
+      <CardActions></CardActions>
+      <CardActions>
+        <Typography component="p">
+          Showing
+          {state > props.data.length
+            ? ` all ${props.data.length} hashtags`
+            : ` ${state} of ${props.data.length} hashtags`}
+        </Typography>
+        {state < props.data.length && <Button size="small" onClick={showAll}>
+          Show all
+        </Button>}
+      </CardActions>
     </Paper>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { Search, About, Results, User, Hashtag } from "./views";
+import { Search, About, Results, User, Hashtag, Tweet } from "./views";
 import Button from "@material-ui/core/Button";
 import { Neo4jDriver } from "./services";
 
@@ -33,9 +33,13 @@ function App() {
           <div className="App-main">
             <Switch>
               <Route path="/about" component={About} />
-              <Route path="/results/:location/:topic" component={Results} />
+              <Route
+                path="/results/:location/:topic/:id?"
+                component={Results}
+              />
               <Route path="/user/:id/" component={User} />
               <Route path="/hashtag/:name/" component={Hashtag} />
+              <Route path="/tweet/:id/" component={Tweet} />
               <Route path="/:explore?" component={Search} />
             </Switch>
           </div>

@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.5.0",
     "@material-ui/icons": "^4.4.3",
+    "@material-ui/lab": "^4.0.0-alpha.28",
     "neo4j-driver": "^1.7.6",
     "react": "^16.10.0",
     "react-dom": "^16.10.0",
