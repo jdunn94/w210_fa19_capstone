@@ -2,7 +2,7 @@ MATCH (u:User)
 WITH u, SIZE((u)-[:TWEETED]->(:Tweet)) as tc
 where tc > 10
 with u
-order by tc asc
+order by rand()
 with collect(u)[..5] as users
 unwind users as target
 CALL apoc.static.getAll("twitter") yield value AS twitter
