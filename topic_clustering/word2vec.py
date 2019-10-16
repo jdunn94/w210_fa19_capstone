@@ -1,4 +1,5 @@
 import gensim
+import os
 import pickle
 import sys
 import numpy as np
@@ -80,7 +81,7 @@ def word2vec(X, y):
     model = gensim.models.Word2Vec(
         X, size=10, window=5, min_count=1, workers=2)
     model.init_sims(replace=True)
-    model.save('w2v.model')
+    model.save(os.path.join('data', 'w2v.model'))
     print('Save word2vec to w2v.model')
 
     for key in KEY_WORDS:
@@ -119,7 +120,7 @@ def tsne_plot_similar_words(model, filename='word2vec'):
         embeddings = []
         words = []
         try:
-            for similar_word, _ in model.most_similar(word, topn=30):
+            for similar_word, _ in model.wv.most_similar(word, topn=30):
                 words.append(similar_word)
                 embeddings.append(model[similar_word])
                 # print(embeddings)
@@ -168,9 +169,9 @@ def tsne_plot_similar_words(model, filename='word2vec'):
 
 def main(X_filename=None, Y_filename=None):
     if X_filename is None:
-        X_filename = 'X.pkl'
+        X_filename = os.path.join('data', 'X.pkl')
     if Y_filename is None:
-        Y_filename = 'Y.pkl'
+        Y_filename = os.path.join('data', 'Y.pkl')
     with open(X_filename, 'rb') as f:
         X1 = pickle.load(f)
     with open(Y_filename, 'rb') as f:
@@ -189,7 +190,7 @@ def main(X_filename=None, Y_filename=None):
     print('X dim=(', len(X), ',', len(X[0]), '),type=', type(
         Y), 'Y dim=', len(Y), 'type=', type(Y))
     (w2v, words) = word2vec(X, Y)
-    with open('words.pkl', 'wb') as f:
+    with open(os.path.join('data', 'words.pkl'), 'wb') as f:
         pickle.dump(words, f)
         print('Dump words to words.pkl: dim=', len(words))
     tsne_plot_similar_words(model=w2v, filename='word2vec')

@@ -14,7 +14,7 @@ print('Read files:', len(files))
 
 OUTPUT_FILENAME = 'our_training_10_15.csv'
 
-write_file = open(OUTPUT_FILENAME, 'w')
+write_file = open(os.path.join('data', OUTPUT_FILENAME), 'w')
 write_file.write(',text,class\n')
 
 # remove duplicates
@@ -48,5 +48,5 @@ for fname in files:
         print('Proccessed:', fname)
 
 write_file.close()
-print("\r\n*********write tweets to tweets.txt, duplicates: ", duplicates,
+print("\r\n*********write tweets to", OUTPUT_FILENAME, ", duplicates: ", duplicates,
       "*********")

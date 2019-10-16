@@ -15,6 +15,7 @@ import re
 import itertools
 import collections
 import nltk  # Natural Language Processing
+import os
 import pickle
 
 # nltk.download('punkt')
@@ -213,11 +214,6 @@ def read_csv():
     return data
 
 
-def read_tweets_from_txt(file_name):
-    with open(file_name) as f:
-        return f.readlines()
-
-
 # Words Replacement ******************************************************
 def replace_all(text, dic):
     for i, j in dic.items():
@@ -235,10 +231,10 @@ def main(data_filename=None):
     (X, Y) = read_tokenize_data(data_filename)
     # print(X)
     # print(Y)
-    with open('X.pkl', 'wb') as f:
+    with open(os.path.join('data', 'X.pkl'), 'wb') as f:
         pickle.dump(X, f)
         print('Save X into X.pkl: dim1=', len(X), "dim2=", len(X[0]))
-    with open('Y.pkl', 'wb') as f:
+    with open(os.path.join('data', 'Y.pkl'), 'wb') as f:
         pickle.dump(Y, f)
         print('Save Y into Y.pkl: dim1=', len(Y))
     # end of main

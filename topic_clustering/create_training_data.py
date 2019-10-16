@@ -77,9 +77,9 @@ def main(training_data_dir=None):
     # Step 1, get training dataframe
     curr_dir = os.path.dirname(os.getcwd())
     training_df = get_training_data(training_data_dir)
-    os.chdir(curr_dir)
-    training_df.to_csv(r'training.csv')
-    print("Write training data into ", str(curr_dir), "/training.csv")
+    os.chdir(os.path.join('data', curr_dir))
+    training_df.to_csv('training.csv')
+    print("Write training data into /data/training.csv")
     # end of main
 
 
