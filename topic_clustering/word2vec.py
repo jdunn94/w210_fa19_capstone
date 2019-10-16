@@ -71,28 +71,30 @@ class TfidfEmbeddingVectorizer(object):
         ])
     # end of TfidfEmbeddingVectorizer
 
-KEY_WORDS = ['homeless', 'home', 'house', 'poverty']
+
+KEY_WORDS = ['homeless']
+
 
 def word2vec(X, y):
     # let X be a list of tokenized texts (i.e. list of lists of tokens)
     model = gensim.models.Word2Vec(
-        X, size=10, window=3, min_count=1, workers=2)
+        X, size=10, window=5, min_count=1, workers=2)
     model.init_sims(replace=True)
     model.save('w2v.model')
     print('Save word2vec to w2v.model')
-  
+
     for key in KEY_WORDS:
-      try:
-        print(key, ' similar words:',
-            model.wv.most_similar_cosmul(positive=[key], topn=20))
-      except:
-        print('No such keyword:', key)
-  
+        try:
+            print(key, ' similar words:',
+                  model.wv.most_similar_cosmul(positive=[key], topn=20))
+        except BaseException:
+            print('No such keyword:', key)
+
     #print(list(islice(model.wv.vocab, 1, 10)))
     # estimate the accuracy
     # w2v = {w: vec for w, vec in zip(model.wv.index2word, model.wv.vectors)}
     w2v = {w: vec for w, vec in zip(model.wv.index2word, model.wv.vectors)}
-    
+
     # Pipeline 1 using tree
     tree_w2v_tfidf = Pipeline([
         ("word2vec vectorizer", TfidfEmbeddingVectorizer(w2v)),
@@ -101,13 +103,14 @@ def word2vec(X, y):
     print("tree_w2v_tfidf acc=", scores)
 
     # Pipeline 2
-    #svc_tfidf = Pipeline([("tfidf_vectorizer", TfidfVectorizer(
+    # svc_tfidf = Pipeline([("tfidf_vectorizer", TfidfVectorizer(
     #    analyzer=lambda x: x)), ("linear svc", SVC(kernel="linear"))])
     #scores = cross_val_score(svc_tfidf, X, y, cv=5)
     #print("svc_tfidf acc=", scores)
-    
+
     return (model, list(model.wv.vocab))
     # end of func
+
 
 def tsne_plot_similar_words(model, filename='word2vec'):
     embedding_clusters = []
@@ -116,14 +119,14 @@ def tsne_plot_similar_words(model, filename='word2vec'):
         embeddings = []
         words = []
         try:
-          for similar_word, _ in model.most_similar(word, topn=30):
-              words.append(similar_word)
-              embeddings.append(model[similar_word])
-              # print(embeddings)
-          embedding_clusters.append(embeddings)
-          word_clusters.append(words)
-        except:
-          print(word, ' not in the vocab.')
+            for similar_word, _ in model.most_similar(word, topn=30):
+                words.append(similar_word)
+                embeddings.append(model[similar_word])
+                # print(embeddings)
+            embedding_clusters.append(embeddings)
+            word_clusters.append(words)
+        except BaseException:
+            print(word, ' not in the vocab.')
 
     tsne_model_en_2d = TSNE(
         perplexity=15,

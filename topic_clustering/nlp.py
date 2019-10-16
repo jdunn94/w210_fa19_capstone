@@ -35,7 +35,7 @@ from autocorrect import Speller
 #   returns a list of tokens.
 
 
-def nlp(tweets_vector):
+def nlp(tweets_vector, cluster_list):
     emoticons_str = r"""
     (?:
     [:=;] # Eyes
@@ -106,57 +106,34 @@ def nlp(tweets_vector):
     # Use tweetList -  that is a list from DF (using .tolist())
     # It is a tuple: initial list from all tweets
     outlist_init = filterPick(tweets_vector.tolist(), search_regex)
+
     char_remove = [']', '[', '(', ')', '{', '}']  # characters to be removed
     emotion_list = [':)', ';)', '(:', '(;', '}', '{', '}']
     word_garb = [
-        'here',
-        'there',
-        'where',
-        'when',
-        'would',
-        'should',
-        'could',
         'thats',
         'youre',
         'thanks',
         'hasn',
-        'thank',
         'https',
-        'since',
         'wanna',
         'gonna',
         'aint',
-        'http',
-        'unto',
-        'onto',
-        'into',
         'havent',
         'dont',
-        'done',
         'cant',
         'werent',
-        'https',
         'u',
         'isnt',
-        'go',
         'theyre',
-        'each',
-        'every',
         'shes',
         'youve',
         'youll',
         'weve',
-        'theyve']
+        'theyve', 
+        'amp',
+        'doesnt', 
+        'ive']
 
-    # Dictionary with Replacement Pairs **************************************
-    repl_dict = {
-        'googleele': 'goog',
-        'lyin': 'lie',
-        'googles': 'goog',
-        'aapl': 'apple',
-        'msft': 'microsoft',
-        'google': 'goog',
-        'googl': 'goog'}
     exclude = list(string.punctuation) + emotion_list + word_garb
 
     # Convert tuple to a list, then to a string; Remove the characters; Stays
@@ -169,10 +146,13 @@ def nlp(tweets_vector):
 
     # a list of list of tokens
     X = list()
+    Y = list()
     counter = 1
-    for tweet in outlist_init:
+    for i in range(len(outlist_init)):
+        tweet = outlist_init[i]
+        cluster = cluster_list[i]
         if counter % 100 == 0:
-          print('Proccessed tweets:', counter)
+            print('Proccessed tweets:', counter)
         tw_clean = []
         tw_clean = [ch for ch in tweet if ch not in char_remove]
         tw_clean = re.sub(URL, "", str(tw_clean))
@@ -188,37 +168,57 @@ def nlp(tweets_vector):
         tw_clean = re.sub('"', "", str(tw_clean))
         # Removes # and @ in words (lookahead)
         tw_clean = re.sub(r'(?:^|\s)[@#].*?(?=[,;:.!?]|\s|$)', r'', tw_clean)
-        tw_clean = lmtzr.lemmatize(str(tw_clean))
-        tw_clean = stemmer.stem(str(tw_clean))
+        tw_clean = re.sub(r'/', r' ', tw_clean)
         tw_clean_lst = re.findall(r'\w+', str(tw_clean))
-        tw_clean_lst = [tw.lower() for tw in tw_clean_lst if tw.lower()
-                        not in stopwords.words('english')]
-        tw_clean_lst = [word for word in tw_clean_lst if word not in exclude]
-        tw_clean_lst = str([word for word in tw_clean_lst if len(
-            word) > MIN_WORDS_PER_TWEET])
-        tw_clean_lst = re.findall(r'\w+', str(tw_clean_lst))
-        tw_clean_lst = [replace_all(word, repl_dict) for word in tw_clean_lst]
-        # print("org tweet = ", tweet)
-        # tw_clean_str = spell(" ".join(tw_clean_lst))
-        # print("cleaned tweet = (", tw_clean_str, ")")
+
+        tw_clean_lst = [word.lower() for word in tw_clean_lst if word not in exclude]
+
+        # Keeps only nouns
+        tw_clean_lst = [word[0] for word in nltk.pos_tag(tw_clean_lst) if
+            word[1].startswith('N') or word[1].startswith('J')]
+        
+        # Lemma, stem
+        tw_clean_lst = [lmtzr.lemmatize(word) for word in tw_clean_lst]
+        tw_clean_lst = [stemmer.stem(word) for word in tw_clean_lst]
+        tw_clean_lst = [spell(word) for word in tw_clean_lst]
+        if len(tw_clean_lst) < MIN_WORDS_PER_TWEET:
+          continue
+        tw_clean_lst = [word for word in tw_clean_lst if len(word) > 2]
+        tw_clean_lst = [word for word in tw_clean_lst if word not in stopwords.words('english')]
+  
+        #print("org tweet = ", tweet)
+        #print("cleaned tweet = (", tw_clean_lst, ")")
         X.append(tw_clean_lst)
+        Y.append(cluster)
         counter += 1
-    return X
+    
+    return (X, Y)
     # end of nlp func
 
+
 def read_csv():
-  data = pd.read_csv(DATA_FILENAME, delimiter=',', names=['sentiment', 'id', 'date', 'query', 'user', 'tweet'])
-  print("Read data stats: ", data.count())
-  # print("Top data records")
-  # print(data.head()[['tweet']])
-  return data
+    data = pd.read_csv(
+        DATA_FILENAME,
+        delimiter=',',
+        names=[
+            'sentiment',
+            'id',
+            'date',
+            'query',
+            'user',
+            'tweet'])
+    print("Read data stats: ", data.count())
+    # print("Top data records")
+    # print(data.head()[['tweet']])
+    return data
+
 
 def read_tweets_from_txt(file_name):
-  with open(file_name) as f:
-    return f.readlines()
+    with open(file_name) as f:
+        return f.readlines()
 
 
-# Words Replacement ***************************************************************************************
+# Words Replacement ******************************************************
 def replace_all(text, dic):
     for i, j in dic.items():
         text = text.replace(i, j)
@@ -228,8 +228,7 @@ def replace_all(text, dic):
 def read_tokenize_data(filename):
     df = pd.read_csv(filename)
     print('Columns=', list(df.columns))
-    X = nlp(df['text'])
-    return (X, df['class'].tolist())
+    return nlp(df['text'], df['class'].tolist())
 
 
 def main(data_filename=None):
