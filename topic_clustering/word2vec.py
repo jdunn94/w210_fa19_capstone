@@ -15,7 +15,7 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-DIM_SIZE_OF_WORD2VEC = 500
+DIM_SIZE_OF_WORD2VEC = 100
 
 
 class MeanEmbeddingVectorizer(object):
@@ -71,45 +71,59 @@ class TfidfEmbeddingVectorizer(object):
         ])
     # end of TfidfEmbeddingVectorizer
 
+KEY_WORDS = ['homeless', 'home', 'house', 'poverty']
 
 def word2vec(X, y):
     # let X be a list of tokenized texts (i.e. list of lists of tokens)
     model = gensim.models.Word2Vec(
-        X, size=50, window=3, min_count=1, workers=2)
+        X, size=10, window=3, min_count=1, workers=2)
     model.init_sims(replace=True)
     model.save('w2v.model')
     print('Save word2vec to w2v.model')
-    print('trump similar words:', model.most_similar("trump"))
-    print(list(islice(model.wv.vocab, 1, 10)))
+  
+    for key in KEY_WORDS:
+      try:
+        print(key, ' similar words:',
+            model.wv.most_similar_cosmul(positive=[key], topn=20))
+      except:
+        print('No such keyword:', key)
+  
+    #print(list(islice(model.wv.vocab, 1, 10)))
     # estimate the accuracy
     # w2v = {w: vec for w, vec in zip(model.wv.index2word, model.wv.vectors)}
-    w2v = {w: vec for w, vec in zip(model.wv.index2word, model.wv.syn0)}
-    # print(w2v)
+    w2v = {w: vec for w, vec in zip(model.wv.index2word, model.wv.vectors)}
+    
+    # Pipeline 1 using tree
     tree_w2v_tfidf = Pipeline([
         ("word2vec vectorizer", TfidfEmbeddingVectorizer(w2v)),
         ("extra trees", ExtraTreesClassifier(n_estimators=200))])
     scores = cross_val_score(tree_w2v_tfidf, X, y, cv=5)
     print("tree_w2v_tfidf acc=", scores)
-    svc_tfidf = Pipeline([("tfidf_vectorizer", TfidfVectorizer(
-        analyzer=lambda x: x)), ("linear svc", SVC(kernel="linear"))])
-    scores = cross_val_score(svc_tfidf, X, y, cv=5)
-    print("svc_tfidf acc=", scores)
-    return (model, list(model.wv.vocab))
 
+    # Pipeline 2
+    #svc_tfidf = Pipeline([("tfidf_vectorizer", TfidfVectorizer(
+    #    analyzer=lambda x: x)), ("linear svc", SVC(kernel="linear"))])
+    #scores = cross_val_score(svc_tfidf, X, y, cv=5)
+    #print("svc_tfidf acc=", scores)
+    
+    return (model, list(model.wv.vocab))
+    # end of func
 
 def tsne_plot_similar_words(model, filename='word2vec'):
-    keys = list(islice(model.wv.vocab, 1, 15))
     embedding_clusters = []
     word_clusters = []
-    for word in keys:
+    for word in KEY_WORDS:
         embeddings = []
         words = []
-        for similar_word, _ in model.most_similar(word, topn=30):
-            words.append(similar_word)
-            embeddings.append(model[similar_word])
-            # print(embeddings)
-        embedding_clusters.append(embeddings)
-        word_clusters.append(words)
+        try:
+          for similar_word, _ in model.most_similar(word, topn=30):
+              words.append(similar_word)
+              embeddings.append(model[similar_word])
+              # print(embeddings)
+          embedding_clusters.append(embeddings)
+          word_clusters.append(words)
+        except:
+          print(word, ' not in the vocab.')
 
     tsne_model_en_2d = TSNE(
         perplexity=15,
@@ -129,9 +143,9 @@ def tsne_plot_similar_words(model, filename='word2vec'):
         2)
 
     plt.figure(figsize=(16, 9))
-    colors = cm.rainbow(np.linspace(0, 1, len(keys)))
+    colors = cm.rainbow(np.linspace(0, 1, len(KEY_WORDS)))
     for label, embeddings, words, color in zip(
-            keys, embeddings_en_2d, word_clusters, colors):
+            KEY_WORDS, embeddings_en_2d, word_clusters, colors):
         print(len(embeddings))
         x = embeddings[:, 0]
         y = embeddings[:, 1]
