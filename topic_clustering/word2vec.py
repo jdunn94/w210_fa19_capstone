@@ -73,7 +73,7 @@ class TfidfEmbeddingVectorizer(object):
     # end of TfidfEmbeddingVectorizer
 
 
-KEY_WORDS = ['homeless']
+KEY_WORDS = ['homelessness']
 
 
 def word2vec(X, y):
@@ -128,6 +128,10 @@ def tsne_plot_similar_words(model, filename='word2vec'):
             word_clusters.append(words)
         except BaseException:
             print(word, ' not in the vocab.')
+
+    if len(word_clusters) == 0 or len(embedding_clusters) == 0:
+      print('No similar words are found for any topics')
+      return
 
     tsne_model_en_2d = TSNE(
         perplexity=15,

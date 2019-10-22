@@ -130,9 +130,9 @@ def nlp(tweets_vector, cluster_list):
         'youve',
         'youll',
         'weve',
-        'theyve', 
+        'theyve',
         'amp',
-        'doesnt', 
+        'doesnt',
         'ive']
 
     exclude = list(string.punctuation) + emotion_list + word_garb
@@ -141,6 +141,8 @@ def nlp(tweets_vector, cluster_list):
     # as a STRING. Porter Stemmer
     stemmer = PorterStemmer()
     lmtzr = WordNetLemmatizer()
+    spwords = set(stopwords.words('english'))
+    spwords.add(('everyone', 'one', 'person', 're', 'someone', 'today'))
 
     # Auto spelling corrector in python3
     spell = Speller(lang='en')
@@ -172,27 +174,43 @@ def nlp(tweets_vector, cluster_list):
         tw_clean = re.sub(r'/', r' ', tw_clean)
         tw_clean_lst = re.findall(r'\w+', str(tw_clean))
 
-        tw_clean_lst = [word.lower() for word in tw_clean_lst if word not in exclude]
+        tw_clean_lst = [word.lower()
+                        for word in tw_clean_lst if word not in exclude]
 
         # Keeps only nouns
         tw_clean_lst = [word[0] for word in nltk.pos_tag(tw_clean_lst) if
-            word[1].startswith('N') or word[1].startswith('J')]
-        
+                        word[1].startswith('N')]
+
+        found = False
+        keyword = 'homelessness'
+        if keyword in tw_clean_lst:
+            found = True
+            # print(tw_clean_lst)
+
         # Lemma, stem
         tw_clean_lst = [lmtzr.lemmatize(word) for word in tw_clean_lst]
-        tw_clean_lst = [stemmer.stem(word) for word in tw_clean_lst]
+        if keyword not in tw_clean_lst and found:
+            raise Exception('after lmtzr.lemmatize, homelessness is gone.')
+
+        # Remove stem since it cleaned homelessness to homeless.
+        #tw_clean_lst = [stemmer.stem(word) for word in tw_clean_lst]
+        # if keyword not in tw_clean_lst and found:
+        #  print(tw_clean_lst)
+        #  raise Exception('after stemmer.stem, homelessness is gone.')
+
         tw_clean_lst = [spell(word) for word in tw_clean_lst]
+        if keyword not in tw_clean_lst and found:
+            raise Exception('after stemmer.stem, homelessness is gone.')
+
         if len(tw_clean_lst) < MIN_WORDS_PER_TWEET:
-          continue
+            continue
         tw_clean_lst = [word for word in tw_clean_lst if len(word) > 2]
-        tw_clean_lst = [word for word in tw_clean_lst if word not in stopwords.words('english')]
-  
-        #print("org tweet = ", tweet)
-        #print("cleaned tweet = (", tw_clean_lst, ")")
+        tw_clean_lst = [word for word in tw_clean_lst if word not in spwords]
+
         X.append(tw_clean_lst)
         Y.append(cluster)
         counter += 1
-    
+
     return (X, Y)
     # end of nlp func
 
