@@ -1,3 +1,4 @@
+# Read X.pkl and Y.pkl from data folder then create word2vec model.
 import gensim
 import os
 import pickle
