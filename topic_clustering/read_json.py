@@ -1,3 +1,5 @@
+# This file read raw json data file from bucket and output a training dataset formatted as id,text,class.
+
 import hashlib
 import json
 import os

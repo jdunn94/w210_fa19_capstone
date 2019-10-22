@@ -1,6 +1,4 @@
-# The original tweets are downloaded from https://www.kaggle.com/kazanova/sentiment140/downloads/sentiment140.zip/2, then
-# cat training.1600000.processed.noemoticon.csv | grep -i 'healthcare' > /tmp/healthcare
-# to select these with key word healthcare.
+# This file read training.csv, then create token file X.pkl and label vector file Y.plk.
 
 from __future__ import absolute_import
 from __future__ import division
