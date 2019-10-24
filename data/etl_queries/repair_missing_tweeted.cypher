@@ -1,6 +1,7 @@
-MATCH (stubTweets:Tweet)
-WHERE stubTweets.created_at is null or stubTweets.truncated = TRUE
-with stubTweets.id as ids
+// repairs missing TWEETED relationships by re-fetching the orphan tweet
+match (t:Tweet)
+where not ((t)-[:TWEETED]-(:User))
+with t.id as ids
 order by rand()
 WITH collect(ids)[..100] as tweet_ids
 WITH REDUCE(s = HEAD(tweet_ids), n IN TAIL(tweet_ids) | s + ',' + n) AS result

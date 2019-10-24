@@ -9,7 +9,7 @@ MAX_IMPORTS = 100
 SLEEP = 300
 
 uri = "bolt://localhost:7687"
-driver = GraphDatabase.driver(uri, auth=("neo4j", "mcai2019"))
+driver = GraphDatabase.driver(uri, auth=("etl", "MCai2019-etl"))
 
 # get last json import file number
 complete_json = 0
