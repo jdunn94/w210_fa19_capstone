@@ -40,7 +40,7 @@ with open(os.path.join(data_folder,location_file)) as csv_file:
                 locations[row[1]] = {"geocode":row[2]+",15mi","since_id":0, "statuses": {}}
         line_count += 1
 
-print(f"Locations found: len(locations)")
+print(f"Locations found: {len(locations)}")
 
 print(f"Checking for existing tweet file: {os.path.join(data_folder,tweet_file)}")
 if os.path.exists(os.path.join(data_folder,tweet_file)):
