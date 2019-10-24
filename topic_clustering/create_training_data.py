@@ -52,7 +52,7 @@ def build_data_frame(path, classification):
     counter = 0
     for file_name, text in read_files(path):
         if counter == 10:
-            break
+            print('processed files', counter)
         counter = counter + 1
         rows.append({'text': text, 'class': classification})
         index.append(file_name)
@@ -73,18 +73,13 @@ def get_training_data(data_dir=None):
     # end of get_training_data
 
 
-def train_word2vec():
-    pass
-    # end of train_word2vec
-
-
 def main(training_data_dir=None):
     # Step 1, get training dataframe
     curr_dir = os.path.dirname(os.getcwd())
     training_df = get_training_data(training_data_dir)
-    os.chdir(curr_dir)
-    training_df.to_csv(r'training.csv')
-    print("Write training data into ", str(curr_dir), "/training.csv")
+    os.chdir(os.path.join('data', curr_dir))
+    training_df.to_csv('training.csv')
+    print("Write training data into /data/training.csv")
     # end of main
 
 

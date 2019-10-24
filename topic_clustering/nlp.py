@@ -1,6 +1,4 @@
-# The original tweets are downloaded from https://www.kaggle.com/kazanova/sentiment140/downloads/sentiment140.zip/2, then
-# cat training.1600000.processed.noemoticon.csv | grep -i 'healthcare' > /tmp/healthcare
-# to select these with key word healthcare.
+# This file read training.csv, then create token file X.pkl and label vector file Y.plk.
 
 from __future__ import absolute_import
 from __future__ import division
@@ -15,6 +13,7 @@ import re
 import itertools
 import collections
 import nltk  # Natural Language Processing
+import os
 import pickle
 
 # nltk.download('punkt')
@@ -33,13 +32,15 @@ from autocorrect import Speller
 
 # tweet_raw: original tweet string(text)
 #   returns a list of tokens.
-def nlp(tweet_list_org):
-  emoticons_str = r"""
-  (?:
-  [:=;] # Eyes
-  [oO\-]? # Nose (optional)
-  [D\)\]\(\]/\\OpP] # Mouth
-  )"""
+
+
+def nlp(tweets_vector, cluster_list):
+    emoticons_str = r"""
+    (?:
+    [:=;] # Eyes
+    [oO\-]? # Nose (optional)
+    [D\)\]\(\]/\\OpP] # Mouth
+    )"""
 
     # Regex_str is used to GET text from CSV file
     regex_str = [
@@ -104,70 +105,55 @@ def nlp(tweet_list_org):
     # Use tweetList -  that is a list from DF (using .tolist())
     # It is a tuple: initial list from all tweets
     outlist_init = filterPick(tweets_vector.tolist(), search_regex)
+
     char_remove = [']', '[', '(', ')', '{', '}']  # characters to be removed
     emotion_list = [':)', ';)', '(:', '(;', '}', '{', '}']
     word_garb = [
-        'here',
-        'there',
-        'where',
-        'when',
-        'would',
-        'should',
-        'could',
         'thats',
         'youre',
         'thanks',
         'hasn',
-        'thank',
         'https',
-        'since',
         'wanna',
         'gonna',
         'aint',
-        'http',
-        'unto',
-        'onto',
-        'into',
         'havent',
         'dont',
-        'done',
         'cant',
         'werent',
-        'https',
         'u',
         'isnt',
-        'go',
         'theyre',
-        'each',
-        'every',
         'shes',
         'youve',
         'youll',
         'weve',
-        'theyve']
+        'theyve',
+        'amp',
+        'doesnt',
+        'ive']
 
-    # Dictionary with Replacement Pairs **************************************
-    repl_dict = {
-        'googleele': 'goog',
-        'lyin': 'lie',
-        'googles': 'goog',
-        'aapl': 'apple',
-        'msft': 'microsoft',
-        'google': 'goog',
-        'googl': 'goog'}
     exclude = list(string.punctuation) + emotion_list + word_garb
 
     # Convert tuple to a list, then to a string; Remove the characters; Stays
     # as a STRING. Porter Stemmer
     stemmer = PorterStemmer()
     lmtzr = WordNetLemmatizer()
+    spwords = set(stopwords.words('english'))
+    spwords.add(('everyone', 'one', 'person', 're', 'someone', 'today'))
 
     # Auto spelling corrector in python3
     spell = Speller(lang='en')
 
     # a list of list of tokens
     X = list()
-    for tweet in outlist_init:
+    Y = list()
+    counter = 1
+    for i in range(len(outlist_init)):
+        tweet = outlist_init[i]
+        cluster = cluster_list[i]
+        if counter % 100 == 0:
+            print('Proccessed tweets:', counter)
         tw_clean = []
         tw_clean = [ch for ch in tweet if ch not in char_remove]
         tw_clean = re.sub(URL, "", str(tw_clean))
@@ -183,149 +169,68 @@ def nlp(tweet_list_org):
         tw_clean = re.sub('"', "", str(tw_clean))
         # Removes # and @ in words (lookahead)
         tw_clean = re.sub(r'(?:^|\s)[@#].*?(?=[,;:.!?]|\s|$)', r'', tw_clean)
-        tw_clean = lmtzr.lemmatize(str(tw_clean))
-        tw_clean = stemmer.stem(str(tw_clean))
+        tw_clean = re.sub(r'/', r' ', tw_clean)
         tw_clean_lst = re.findall(r'\w+', str(tw_clean))
-        tw_clean_lst = [tw.lower() for tw in tw_clean_lst if tw.lower()
-                        not in stopwords.words('english')]
-        tw_clean_lst = [word for word in tw_clean_lst if word not in exclude]
-        tw_clean_lst = str([word for word in tw_clean_lst if len(
-            word) > MIN_WORDS_PER_TWEET or word.lower() in WORDS_KEEP])
-        tw_clean_lst = re.findall(r'\w+', str(tw_clean_lst))
-        tw_clean_lst = [replace_all(word, repl_dict) for word in tw_clean_lst]
-        #print("org tweet = ", tweet)
-        #tw_clean_str = spell(" ".join(tw_clean_lst))
-        #print("cleaned tweet = (", tw_clean_str, ")")
+
+        tw_clean_lst = [word.lower()
+                        for word in tw_clean_lst if word not in exclude]
+
+        # Keeps only nouns
+        tw_clean_lst = [word[0] for word in nltk.pos_tag(tw_clean_lst) if
+                        word[1].startswith('N')]
+
+        found = False
+        keyword = 'homelessness'
+        if keyword in tw_clean_lst:
+            found = True
+            # print(tw_clean_lst)
+
+        # Lemma, stem
+        tw_clean_lst = [lmtzr.lemmatize(word) for word in tw_clean_lst]
+        if keyword not in tw_clean_lst and found:
+            raise Exception('after lmtzr.lemmatize, homelessness is gone.')
+
+        # Remove stem since it cleaned homelessness to homeless.
+        #tw_clean_lst = [stemmer.stem(word) for word in tw_clean_lst]
+        # if keyword not in tw_clean_lst and found:
+        #  print(tw_clean_lst)
+        #  raise Exception('after stemmer.stem, homelessness is gone.')
+
+        tw_clean_lst = [spell(word) for word in tw_clean_lst]
+        if keyword not in tw_clean_lst and found:
+            raise Exception('after stemmer.stem, homelessness is gone.')
+
+        if len(tw_clean_lst) < MIN_WORDS_PER_TWEET:
+            continue
+        tw_clean_lst = [word for word in tw_clean_lst if len(word) > 2]
+        tw_clean_lst = [word for word in tw_clean_lst if word not in spwords]
+
         X.append(tw_clean_lst)
-    return X
+        Y.append(cluster)
+        counter += 1
+
+    return (X, Y)
     # end of nlp func
 
-  # Regex_str is used to GET text from CSV file
-  regex_str = [
-    r'<[^>]+>', # HTML tags
-    r'(?:@[\w_]+)', # @-signs
-    r"(?:\#+[\w_]+[\w\'_\-]*[\w_]+)", # hash-tags
-    r'http[s]?://(?:[a-z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-f][0-9a-f]))+', # URLs
-    r'(?:(?:\d+,?)+(?:\.?\d+)?)', # numbers
-    r"(?:[a-z][a-z'\-_]+[a-z])", # words with - and '
-    r'(?:[\w_]+)' # other words
-  ]
-
-  # These Regex are used to EXCLUDE items from the text AFTER IMPORTING from csv with regex_str
-  numbers = r'(?:(?:\d+,?)+(?:\.?\d+)?)'
-  URL = r'http[s]?://(?:[a-z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-f][0-9a-f]))+'
-  html_tag = r'<[^>]+>'
-  hash_tag = r"(?:\#+[\w_]+[\w\'_\-]*[\w_]+)"
-  at_sign = r'(?:@[\w_]+)'
-  dash_quote = r"(?:[a-z][a-z'\-_]+[a-z])"
-  other_word = r'(?:[\w_]+)'
-  other_stuff = r'(?:\S)' # anything else - NOT USED
-  start_pound = r"([#?])(\w+)" # Start with #
-  start_quest_pound = r"(?:^|\s)([?])(\w+)" # Start with ?
-  cont_number = r'(\w*\d\w*)' # Words containing numbers
-
-  #      Remove '[' and ']' brackets
-  sq_br_f = r'(?:[[\w_]+)' # removes '['
-  sq_br_b = r'(?:][\w_]+)' # removes ']'
-
-  rem_bracket = r'(' + '|'.join([sq_br_f, sq_br_b]) +')'
-  rem_bracketC = re.compile(rem_bracket, re.VERBOSE)
-
-  # Removes all words of 3 characters or less *****************************************************
-  short_words = r'\W*\b\w{1,3}\b' # Short words of 3 character or less
-  short_wordsC = re.compile(short_words, re.VERBOSE | re.IGNORECASE)
-
-  # REGEX remove all words with \ and / combinations
-  slash_back =  r'\s*(?:[\w_]*\\(?:[\w_]*\\)*[\w_]*)'
-  slash_fwd = r'\s*(?:[\w_]*/(?:[\w_]*/)*[\w_]*)'
-  slash_all = r'\s*(?:[\w_]*[/\\](?:[\w_]*[/\\])*[\w_]*)'
-
-  # REGEX numbers, short words and URL only to EXCLUDE +++++++++++++++++++++++++++++++++++++++++++++++++++
-  num_url_short = r'(' + '|'.join([numbers, URL, short_words + sq_br_f + sq_br_b]) +')'  # Exclude from tweets
-  comp_num_url_short = re.compile(num_url_short, re.VERBOSE | re.IGNORECASE)
-
-  # Master REGEX to INCLUDE from the original tweets ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  list_regex = r'(' + '|'.join(regex_str) + ')'
-  master_regex = re.compile(list_regex, re.VERBOSE | re.IGNORECASE) # TAKE from tweets INITIALLY
-
-  # Filters IMPORTED from csv file data
-  def filterPick(list, filter):
-    return [ ( l, m.group(1) ) for l in list for m in (filter(l),) if m]
-
-  search_regex = re.compile(list_regex, re.VERBOSE | re.IGNORECASE).search
-
-  MIN_WORDS_PER_TWEET = 2
-
-  # Use tweetList -  that is a list from DF (using .tolist())
-  outlist_init = filterPick(tweet_list_org, search_regex) # It is a tuple: initial list from all tweets
-  char_remove = ['#', ']', '[', '(', ')', '{', '}'] # characters to be removed
-  emotion_list = [':)', ';)', '(:', '(;', '}', '{','}']
-  word_garb = ['here', 'there', 'where', 'when', 'would', 'should', 'could','thats', 'youre', 'thanks', 'hasn',\
-               'thank', 'https', 'since', 'wanna', 'gonna', 'aint', 'http', 'unto', 'onto', 'into', 'havent',\
-               'dont', 'done', 'cant', 'werent', 'https', 'u', 'isnt', 'go', 'theyre', 'each', 'every', 'shes', 'youve', 'youll',\
-               'weve', 'theyve']
-
-  # Dictionary with Replacement Pairs ******************************************************************************
-  exclude = list(string.punctuation) + emotion_list + word_garb
-
-  # Convert tuple to a list, then to a string; Remove the characters; Stays as a STRING. Porter Stemmer
-  stemmer=PorterStemmer()
-  lmtzr = WordNetLemmatizer()
-
-  # Auto spelling corrector in python3
-  spell = Speller(lang='en')
-
-  counter = 1
-  for tweet in outlist_init:
-    tw_clean = []
-    tw_clean = [ch for ch in tweet if ch not in char_remove]
-    tw_clean = re.sub(URL, "", str(tw_clean))
-    tw_clean = re.sub(html_tag, "",str(tw_clean))
-    #tw_clean = re.sub(hash_tag, "",str(tw_clean))
-    tw_clean = re.sub(slash_all,"", str(tw_clean))
-    tw_clean = re.sub(cont_number, "",str(tw_clean))
-    tw_clean = re.sub(numbers, "",str(tw_clean))
-    #tw_clean = re.sub(start_pound, "",str(tw_clean))
-    tw_clean = re.sub(start_quest_pound, "",str(tw_clean))
-    tw_clean = re.sub(at_sign, "",str(tw_clean))
-    tw_clean = re.sub("'", "",str(tw_clean))
-    tw_clean = re.sub('"', "",str(tw_clean))
-    tw_clean = re.sub(r'(?:^|\s)[@].*?(?=[,;:.!?]|\s|$)', r'', tw_clean) # Removes # and @ in words (lookahead)
-    tw_clean = lmtzr.lemmatize(str(tw_clean))
-    tw_clean = stemmer.stem(str(tw_clean))
-    tw_clean_lst = re.findall(r'\w+', str(tw_clean))
-    tw_clean_lst = [tw.lower() for tw in tw_clean_lst if tw.lower() not in stopwords.words('english')]
-    tw_clean_lst = [word for word in tw_clean_lst if word not in exclude]
-    tw_clean_lst = str([word for word in tw_clean_lst if len(word)>MIN_WORDS_PER_TWEET or word.lower() in WORDS_KEEP])
-    tw_clean_lst = re.findall(r'\w+', str(tw_clean_lst))
-    #valid_words = [word for word in WORDS_KEEP if word in tw_clean_lst]
-    #if len(valid_words) == 0:
-    #    continue
-    if len(tw_clean_lst) < MIN_WORDS_PER_TWEET:
-      continue
-    #print("org tweet = ", tweet)
-    tw_clean_str = spell(" ".join(tw_clean_lst))
-    #print("cleaned tweet = (", tw_clean_str, ")")
-    #print("=" * 70)
-    cleaned_tw = re.sub(r',', r' ', str(tweet))
-    OUTPUT_FILE.write("{},{},{}\n".format(counter, cleaned_tw, tw_clean_str))
-    counter = counter + 1
-  print("Write cleaned tweets into cleaned_tweets.csv.\r\n")
-  # end of nlp func
 
 def read_csv():
-  data = pd.read_csv(DATA_FILENAME, delimiter=',', names=['sentiment', 'id', 'date', 'query', 'user', 'tweet'])
-  print("Read data stats: ", data.count())
-  #print("Top data records")
-  #print(data.head()[['tweet']])
-  return data
+    data = pd.read_csv(
+        DATA_FILENAME,
+        delimiter=',',
+        names=[
+            'sentiment',
+            'id',
+            'date',
+            'query',
+            'user',
+            'tweet'])
+    print("Read data stats: ", data.count())
+    # print("Top data records")
+    # print(data.head()[['tweet']])
+    return data
 
-def read_tweets_from_txt(file_name):
-  with open(file_name) as f:
-    return f.readlines()
 
-
-# Words Replacement ***************************************************************************************
+# Words Replacement ******************************************************
 def replace_all(text, dic):
     for i, j in dic.items():
         text = text.replace(i, j)
@@ -335,18 +240,17 @@ def replace_all(text, dic):
 def read_tokenize_data(filename):
     df = pd.read_csv(filename)
     print('Columns=', list(df.columns))
-    X = nlp(df['text'])
-    return (X, df['class'].tolist())
+    return nlp(df['text'], df['class'].tolist())
 
 
 def main(data_filename=None):
     (X, Y) = read_tokenize_data(data_filename)
     # print(X)
     # print(Y)
-    with open('X.pkl', 'wb') as f:
+    with open(os.path.join('data', 'X.pkl'), 'wb') as f:
         pickle.dump(X, f)
         print('Save X into X.pkl: dim1=', len(X), "dim2=", len(X[0]))
-    with open('Y.pkl', 'wb') as f:
+    with open(os.path.join('data', 'Y.pkl'), 'wb') as f:
         pickle.dump(Y, f)
         print('Save Y into Y.pkl: dim1=', len(Y))
     # end of main
