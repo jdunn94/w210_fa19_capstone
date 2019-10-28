@@ -20,11 +20,11 @@ def process_topics(topics):
     # Auto spelling corrector in python3
     spell = Speller(lang='en')
     for topic in topics:
-      s = topic.lower()
-      s = re.sub(r'(?:^|\s)[@#].*?(?=[,;:.!?]|\s|$)', r'', s)
-      s = lmtzr.lemmatize(topic)
-      s = spell(s)
-      cleaned_topics.append(s)
+        s = topic.lower()
+        s = re.sub(r'(?:^|\s)[@#].*?(?=[,;:.!?]|\s|$)', r'', s)
+        s = lmtzr.lemmatize(topic)
+        s = spell(s)
+        cleaned_topics.append(s)
     return cleaned_topics
 
 
@@ -48,6 +48,8 @@ def select_topics(topics, model):
 # This function gets a list of topics <str> that we have in our database,
 # key-value structure of {key=topic, value = list of other topics sorted
 # by similarity descending}
+
+
 def find_similar_topics(topics):
     if len(topics) == 0:
         raise Exception('Input an empty topics list.')

@@ -30,11 +30,9 @@ from operator import itemgetter  # help with dataframes
 
 from autocorrect import Speller
 
-# tweet_raw: original tweet string(text)
-#   returns a list of tokens.
+MIN_SIZE_OF_WORD = 2
 
-
-def nlp(tweets_vector, cluster_list):
+def nlp(tweets_vector, cluster_list, simple_version=False):
     emoticons_str = r"""
     (?:
     [:=;] # Eyes
@@ -74,9 +72,10 @@ def nlp(tweets_vector, cluster_list):
 
     rem_bracket = r'(' + '|'.join([sq_br_f, sq_br_b]) + ')'
     rem_bracketC = re.compile(rem_bracket, re.VERBOSE)
-
-    # Removes all words of 3 characters or less ******************************
-    short_words = r'\W*\b\w{1,3}\b'  # Short words of 3 character or less
+    
+    MIN_SIZE_OF_WOR = 2
+    
+    short_words = r'\W*\b\w{1,2}\b'  # Remove Short words
     short_wordsC = re.compile(short_words, re.VERBOSE | re.IGNORECASE)
 
     # REGEX remove all words with \ and / combinations
@@ -99,8 +98,6 @@ def nlp(tweets_vector, cluster_list):
         return [(l, m.group(1)) for l in tweets for m in (filter(l),) if m]
 
     search_regex = re.compile(list_regex, re.VERBOSE | re.IGNORECASE).search
-
-    MIN_WORDS_PER_TWEET = 2
 
     # Use tweetList -  that is a list from DF (using .tolist())
     # It is a tuple: initial list from all tweets
@@ -134,9 +131,10 @@ def nlp(tweets_vector, cluster_list):
         'ive']
 
     exclude = list(string.punctuation) + emotion_list + word_garb
+    if simple_version:
+      exclude = list(string.punctuation) + emotion_list
 
     # Convert tuple to a list, then to a string; Remove the characters; Stays
-    # as a STRING. Porter Stemmer
     stemmer = PorterStemmer()
     lmtzr = WordNetLemmatizer()
     spwords = set(stopwords.words('english'))
@@ -176,14 +174,13 @@ def nlp(tweets_vector, cluster_list):
                         for word in tw_clean_lst if word not in exclude]
 
         # Keeps only nouns
-        tw_clean_lst = [word[0] for word in nltk.pos_tag(tw_clean_lst) if
-                        word[1].startswith('N')]
+        if not simple_version:
+          tw_clean_lst = [word[0] for word in nltk.pos_tag(tw_clean_lst) if word[1].startswith('N')]
 
         found = False
         keyword = 'homelessness'
         if keyword in tw_clean_lst:
             found = True
-            # print(tw_clean_lst)
 
         # Lemma, stem
         tw_clean_lst = [lmtzr.lemmatize(word) for word in tw_clean_lst]
@@ -200,10 +197,12 @@ def nlp(tweets_vector, cluster_list):
         if keyword not in tw_clean_lst and found:
             raise Exception('after stemmer.stem, homelessness is gone.')
 
-        if len(tw_clean_lst) < MIN_WORDS_PER_TWEET:
-            continue
-        tw_clean_lst = [word for word in tw_clean_lst if len(word) > 2]
-        tw_clean_lst = [word for word in tw_clean_lst if word not in spwords]
+        if not simple_version:
+          tw_clean_lst = [word for word in tw_clean_lst if len(word) >
+              MIN_SIZE_OF_WORD]
+          tw_clean_lst = [word for word in tw_clean_lst if word not in spwords]
+        if len(tw_clean_lst) == 0:
+          continue
 
         X.append(tw_clean_lst)
         Y.append(cluster)
