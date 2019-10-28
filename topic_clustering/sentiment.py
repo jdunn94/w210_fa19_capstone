@@ -18,6 +18,9 @@ from sklearn.naive_bayes import BernoulliNB
 RawTweet = namedtuple('RawTweet', ['id', 'text',
                                    'sentiment'])
 
+DEBUG = False
+
+
 def read_file(CSV_FILENAME):
     # "0","1467810369","Mon Apr 06 22:19:45 PDT 2009","NO_QUERY","_TheSpecialOne_","@switchfoot http://twitpic.com/2y1zl - Awww, that's a bummer.  You shoulda got David Carr of Third Day to do it. ;D"
     data = pd.read_csv(CSV_FILENAME,
@@ -34,12 +37,14 @@ def read_file(CSV_FILENAME):
                        header=None,
                        verbose=True,
                        encoding="ISO-8859-1")
-    print(data.describe())
-    print(data.columns)
-    print(data.shape)
+    if DEBUG:
+        print(data.describe())
+        print(data.columns)
+        print(data.shape)
     data = data[data.text != '']
     data['sentiment'] = np.where(data['label'] == 0, 'negative', 'positive')
-    print(data.head())
+    if DEBUG:
+        print(data.head())
     print(data.shape)
     return data
 
@@ -48,10 +53,11 @@ def process_tweet(data):
     tweets = data['text']
     labels = data['sentiment']
     (X, Y) = nlp(tweets, labels, simple_version=True)
-    print('size of X:', len(X))
-    print('size of Y:', len(Y))
-    print('sample of X:', X[1:10])
-    print('sample fo Y:', Y[1:10])
+    if DEBUG:
+        print('size of X:', len(X))
+        print('size of Y:', len(Y))
+        print('sample of X:', X[1:10])
+        print('sample fo Y:', Y[1:10])
     return (X, Y)
 
 
@@ -113,14 +119,18 @@ def predict_nb(raw_tweet_tuple):
     # Get features from tokens
     with open(os.path.join('data', 'word_features.pkl'), 'rb') as f:
         word_features = pickle.load(f)
-    print('Test_X=', test_X)
+        print('Load data/word_features.pkl')
+    if DEBUG:
+        print('Test_X=', test_X)
     test = extract_features(word_features, test_X[0])
     with open(os.path.join('data', 'BernoulliNB.pkl'), 'rb') as f:
         BernoulliNB_classifier = pickle.load(f)
         print('Load data/BernoulliNB.pkl')
-        print('test=', test)
+        if DEBUG:
+            print('test=', test)
         sentiment = BernoulliNB_classifier.classify(test)
-        print('sentiment = ', sentiment)
+        if DEBUG:
+            print('sentiment = ', sentiment)
         result = RawTweet(id=raw_tweet_tuple.id, text=raw_tweet_tuple.text,
                           sentiment=sentiment)
     return result
