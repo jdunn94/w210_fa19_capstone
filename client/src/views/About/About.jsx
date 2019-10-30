@@ -36,42 +36,42 @@ const About = props => {
             The Mission
           </Typography>
           <Typography align="left">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut
-            dolor ut erat sodales elementum. Curabitur euismod, arcu ac
-            venenatis ornare, orci magna tristique ante, porta consectetur nulla
-            nulla sit amet purus. Sed elementum odio vel ligula mollis faucibus.
-            Praesent suscipit metus nec erat mattis faucibus. Nullam porta diam
-            arcu, id pulvinar urna auctor ultrices. Etiam venenatis sem ligula,
-            cursus aliquet nisi viverra quis. Nulla eget accumsan nunc. Praesent
-            feugiat scelerisque elit non pulvinar.
+            America's legacy of institutional racism, sexism,
+            socioeconomic inequality, homophobia, transphobia, and xenophobia
+            (just to name a few) provides an overwhelming buffet of social
+            problems that urgently need to be solved. Many public sector and
+            nonprofit organizations are working overtime to solve these
+            challenges and are just beginning to tap into the power of social
+            network data at scale to aid their efforts. Today there is a digital
+            divide between organizations that have assets, talent and expertise
+            to leverage digital data to drive operational efficiency and the
+            majority of those who do not have this capacity- small and medium
+            sized organizations. We seek to make social media data accessible to
+            organizations who don't have the resources to gather and process it,
+            and in doing so, possibly connect organizations of all sizes to real
+            people who care about their causes.
           </Typography>
           <br />
           <Typography variant="h3" align="left" gutterBottom>
             The Product
           </Typography>
-          <Typography  align="left">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut
-            dolor ut erat sodales elementum. Curabitur euismod, arcu ac
-            venenatis ornare, orci magna tristique ante, porta consectetur nulla
-            nulla sit amet purus. Sed elementum odio vel ligula mollis faucibus.
-            Praesent suscipit metus nec erat mattis faucibus. Nullam porta diam
-            arcu, id pulvinar urna auctor ultrices. Etiam venenatis sem ligula,
-            cursus aliquet nisi viverra quis. Nulla eget accumsan nunc. Praesent
-            feugiat scelerisque elit non pulvinar.
+          <Typography align="left">
+            mic-check.ai was developed to augment the research and
+            design phase of social good programs. By scouring Twitter for
+            community approved thought leaders, this application provides
+            program managers with a snapshot overview of how social issues are
+            currently impacting communities across the United States.
+            mic-check.ai leverages machine learning techniques, including
+            sentiment and social network analysis, to build user profiles across
+            a variety of metropolitan areas.
           </Typography>
           <br />
           <Typography variant="h3" align="left" gutterBottom>
             The Team
           </Typography>
           <Typography align="left">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut
-            dolor ut erat sodales elementum. Curabitur euismod, arcu ac
-            venenatis ornare, orci magna tristique ante, porta consectetur nulla
-            nulla sit amet purus. Sed elementum odio vel ligula mollis faucibus.
-            Praesent suscipit metus nec erat mattis faucibus. Nullam porta diam
-            arcu, id pulvinar urna auctor ultrices. Etiam venenatis sem ligula,
-            cursus aliquet nisi viverra quis. Nulla eget accumsan nunc. Praesent
-            feugiat scelerisque elit non pulvinar.
+            We are a group of UC Berkeley graduate students interested
+            in the intersection of social good and data science. Please hire us.
           </Typography>
         </div>
       </Paper>

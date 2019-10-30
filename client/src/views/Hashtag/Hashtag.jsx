@@ -19,7 +19,38 @@ const Hashtag = props => {
   return (
     <div className={classes.page}>
       <Typography>Hashtag info for {props.match.params.name}...</Typography>
-      <Typography>Recent tweets...</Typography>
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "space-evenly"
+        }}
+      >
+        <div>
+          <Typography>
+            Other tweets using this hashtag in {props.match.params.location}:
+          </Typography>
+          <div style={{ width: "40%", height: "20%", marginBottom: "100px" }}>
+            Lorem Impsum - % Expected relevance for {props.match.params.topic}
+          </div>
+          <Typography>Other tweets using this hashtag everywhere:</Typography>
+          <div style={{ width: "40%", height: "20%" }}>
+            Lorem Impsum - % Expected relevance for {props.match.params.topic}
+          </div>
+        </div>
+        <div>
+          <Typography>
+            Users in {props.match.params.location} that use this hashtag:
+          </Typography>
+          <div style={{ width: "40%", height: "20%", marginBottom: "100px" }}>
+            Lorem Impsum - % Expected relevance for {props.match.params.topic}
+          </div>
+          <Typography>Users everywhere that use this hashtag:</Typography>
+          <div style={{ width: "40%", height: "20%" }}>
+            Lorem Impsum - % Expected relevance for {props.match.params.topic}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

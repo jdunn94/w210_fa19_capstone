@@ -4,7 +4,7 @@ import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
+import { Typography, Link } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 
 const useStyles = makeStyles({
@@ -39,7 +39,7 @@ const useStyles = makeStyles({
   }
 });
 
-const TweetResultCard = props => {
+const TweetCard = props => {
   const classes = useStyles();
 
   const handleClick = event => {
@@ -50,33 +50,50 @@ const TweetResultCard = props => {
     <Card className={classes.card}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          {props.data.get("user").properties.screen_name}: {props.data.get("t").properties.created_at || "n/a creation"}
+          <Link
+            href={
+              "https://twitter.com/" +
+              props.data.get("users").properties.screen_name +
+              "/status/" +
+              props.data.get("tweets").properties.id
+            }
+            target="_blank"
+            rel="noopener"
+            color="inherit"
+            variant="h6"
+            gutterBottom
+          >
+            @{props.data.get("users").properties.screen_name}:{" "}
+            {new Date(
+              props.data.get("tweets").properties.created_at_date.toString()
+            ).toLocaleDateString() +" " + new Date(
+              props.data.get("tweets").properties.created_at_date.toString()
+            ).toLocaleTimeString() || "n/a creation"}
+          </Link>
         </Typography>
         <Typography className={classes.quotedTweet} gutterBottom>
-          {props.data.get("t").properties.text}
+          {props.data.get("tweets").properties.text}
         </Typography>
         <div>
           <Typography variant="body2" component="p">
-            Favorite Count:{" "}
-            {!!props.data.get("t").properties.favorite_count
-              ? props.data.get("t").properties.favorite_count.toString()
-              : "n/a"}
-          </Typography>
-          <Typography variant="body2" component="p">
-            Retweet Count:{" "}
-            {!!props.data.get("t").properties.retweet_count
-              ? props.data.get("t").properties.retweet_count.toString()
+            Retweets:{" "}
+            {!!props.data.get("tweets").properties.retweet_count
+              ? props.data.get("tweets").properties.retweet_count.toString()
+              : "n/a"}{" "}
+            | Favorites:{" "}
+            {!!props.data.get("tweets").properties.favorite_count
+              ? props.data.get("tweets").properties.favorite_count.toString()
               : "n/a"}
           </Typography>
         </div>
       </CardContent>
       <CardActions>
         <Button size="small" onClick={handleClick}>
-          More info
+          View Insights
         </Button>
       </CardActions>
     </Card>
   );
 };
 
-export default TweetResultCard;
+export default TweetCard;

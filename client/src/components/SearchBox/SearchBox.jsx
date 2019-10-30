@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import {blue} from "@material-ui/core/colors";
-import { TextField, Select, MenuItem, Divider, Paper, Fab } from "@material-ui/core";
+import { blue } from "@material-ui/core/colors";
+import {
+  TextField,
+  Select,
+  MenuItem,
+  Divider,
+  Paper,
+  Fab
+} from "@material-ui/core";
 import { data as mockData } from "./data";
 import SearchIcon from "@material-ui/icons/Search";
 
@@ -39,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     bottom: "-20%",
     position: "absolute",
     width: "400px",
-    height:"36px"
+    height: "36px"
   },
   test: {
     width: "400px"
@@ -59,7 +66,7 @@ const Search = props => {
         whatValue: props.whatValue
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = name => event => {
@@ -76,7 +83,6 @@ const Search = props => {
           value={state.whatValue}
           onChange={handleChange("whatValue")}
           margin="normal"
-          defaultValue={state.nameDefault}
           variant="filled"
           inputProps={{
             className: classes.input

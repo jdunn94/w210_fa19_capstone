@@ -1,14 +1,10 @@
 import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Typography, Divider } from "@material-ui/core";
 
 import { SearchBox } from "../../components";
-import {
-  UserResultBlock,
-  HashtagResultBlock,
-  TweetResultBlock
-} from "./components";
+import { UserBlock, HashtagBlock, TweetBlock } from "../../components";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -39,14 +35,18 @@ const useStyles = makeStyles(theme => ({
   resultsColumns: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-evenly"
+    justifyContent: "space-evenly",
+    marginTop: "10px"
   },
   userResults: {
     width: "60%"
   },
-  tweetResults: {
-    width: "40%"
+  rightColumn: {
+    width: "40%",
+    display: "flex",
+    flexDirection: "column"
   },
+  tweetResults: {}
 }));
 
 const Results = props => {
@@ -59,6 +59,31 @@ const Results = props => {
   const handleSearch = (what, where) => {
     props.history.push(`/results/${where}/${what}`);
   };
+
+  const tweetQuery = `
+  match (u:User {leader:true})-[:POPULAR_TWEETED]->(t:Tweet)
+  where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
+  and u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0 
+  return u as users, t as tweets
+  order by t.retweet_count + t.favorite_count desc, t.created_at_date desc
+`;
+
+  const userQuery = `
+  match (u:User {leader:true})-[r:POPULAR_TWEETED]->(t:Tweet)
+  where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
+  and u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0 
+  with u, t
+  order by t.retweet_count + t.favorite_count desc, t.created_at_date desc
+  return u as users, count(t) as popular_tweets, collect(t)[..3] as tweets
+  order by count(t) desc
+  `;
+
+  const hashtagQuery = `
+MATCH (u:User)-[:COMMON_HASHTAG]->(h:Hashtag)
+WHERE u.leader=TRUE AND u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0
+return h
+order by h.topical_count desc, h.name desc
+  `;
 
   return (
     <div className={classes.page}>
@@ -74,15 +99,36 @@ const Results = props => {
         <Typography className={classes.resultsHeader} variant="h5">
           Search results
         </Typography>
-        <div className={classes.hashtagResults}>
-          <HashtagResultBlock topic={props.match.params.topic} history={props.history} />
-        </div>
+        <Divider variant="middle" />
         <div className={classes.resultsColumns}>
           <div className={classes.userResults}>
-            <UserResultBlock topic={props.match.params.topic} history={props.history} />
+            <UserBlock
+              query={userQuery}
+              expanded={false}
+              history={props.history}
+              topic={props.match.params.topic}
+              location={props.match.params.location}
+            />
           </div>
-          <div className={classes.tweetResults}>
-            <TweetResultBlock topic={props.match.params.topic} history={props.history}/>
+          <div className={classes.rightColumn}>
+            <div className={classes.hashtagResults}>
+              <HashtagBlock
+                query={hashtagQuery}
+                expanded={false}
+                history={props.history}
+                topic={props.match.params.topic}
+                location={props.match.params.location}
+              />
+            </div>
+            <div className={classes.tweetResults}>
+              <TweetBlock
+                query={tweetQuery}
+                expanded={false}
+                history={props.history}
+                topic={props.match.params.topic}
+                location={props.match.params.location}
+              />
+            </div>
           </div>
         </div>
       </div>

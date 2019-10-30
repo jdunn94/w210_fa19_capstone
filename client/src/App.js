@@ -37,8 +37,8 @@ function App() {
                 path="/results/:location/:topic/:id?"
                 component={Results}
               />
-              <Route path="/user/:id/" component={User} />
-              <Route path="/hashtag/:name/" component={Hashtag} />
+              <Route path="/user/:name/:topic/:location" component={User} />
+              <Route path="/hashtag/:name/:topic/:location" component={Hashtag} />
               <Route path="/tweet/:id/" component={Tweet} />
               <Route path="/:explore?" component={Search} />
             </Switch>

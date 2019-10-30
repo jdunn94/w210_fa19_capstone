@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const HashtagResultCard = props => {
+const HashtagCard = props => {
   const classes = useStyles();
 
   const [state, updateState] = useState(20);
@@ -67,15 +67,15 @@ const HashtagResultCard = props => {
           <Chip
             style={{
               backgroundColor: getColor(
-                props.data[0].get("counts").toString(),
-                ht.get("counts").toString()
+                props.data[0].get("h").properties.topical_count.toString(),
+                ht.get("h").properties.topical_count.toString()
               )
             }}
             key={i}
             size="small"
-            id={ht.get("name")}
+            id={ht.get("h").properties.name}
             onClick={handleClick}
-            label={`${ht.get("name")} ${ht.get("counts").toString()}`}
+            label={`${ht.get("h").properties.name} ${ht.get("h").properties.topical_count.toString()}`}
           />
         ))}
       </div>
@@ -95,4 +95,4 @@ const HashtagResultCard = props => {
   );
 };
 
-export default HashtagResultCard;
+export default HashtagCard;
