@@ -43,7 +43,7 @@ const TweetCard = props => {
   const classes = useStyles();
 
   const handleClick = event => {
-    props.navigateTweet(props.data.get("t").properties.id.toString());
+    props.history.push(`/tweet/${props.data.get("tweets").properties.id.toString()}`);
   };
 
   return (

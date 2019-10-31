@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
+import { Neo4jContext } from "../../services";
 
-import { TweetCard } from "../";
+import PropTypes from "prop-types";
 import { Skeleton } from "@material-ui/lab";
 
-import { Neo4jContext } from "../../services";
-import { Typography, Button, ButtonGroup } from "@material-ui/core";
+import { Typography, ButtonGroup, Button } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 
@@ -16,8 +16,11 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column"
   },
   resultCard: {
-    minHeight: "75px",
-    margin: theme.spacing(2)
+    margin: theme.spacing(2),
+    minHeight: "275px"
+  },
+  button: {
+    margin: theme.spacing(0)
   },
   header: {
     display: "flex",
@@ -33,40 +36,37 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const TweetBlock = props => {
+const BlockContainer = props => {
   const classes = useStyles();
   const driver = useContext(Neo4jContext);
 
-  const [tweets, updateTweets] = useState([]);
+  const [items, updateItems] = useState([]);
   const [displayPage, updatePage] = useState(0);
-  const [isTweetsLoading, updateTweetsLoading] = useState(false);
+  const [isLoading, updateLoading] = useState(true);
 
   useEffect(() => {
     const session = driver.session();
-    updateTweets(old => []);
-    updateTweetsLoading(true);
+    updateItems(old => []);
+    updateLoading(true);
     session.run(props.query).subscribe({
       onKeys: keys => {
+        console.log("keys");
         console.log(keys);
       },
       onNext: record => {
-        updateTweets(old => [...old, record]);
+        updateItems(old => [...old, record]);
       },
       onCompleted: () => {
-        updateTweetsLoading(false);
+        updateLoading(false);
         session.close(); // returns a Promise
       },
       onError: error => {
         console.log(error);
       }
     });
-  }, [props.query]);
+  }, [props.query, driver]);
 
-  const navigateTweet = id => {
-    props.history.push(`/tweet/${id}`);
-  };
-
-  if (isTweetsLoading) {
+  if (isLoading) {
     return (
       <div className={classes.results}>
         <Skeleton variant="rect" className={classes.resultCard} />
@@ -76,15 +76,21 @@ const TweetBlock = props => {
     );
   }
 
-  const tweetSlice = tweets.slice(displayPage * 10, (1 + displayPage) * 10);
+  const itemsPage = items.slice(
+    displayPage * props.pageSize,
+    (1 + displayPage) * props.pageSize
+  );
 
-  return (
-    <div className={classes.results}>
-      {!props.expanded && <div className={classes.header}>
-        <Typography>Popular Tweets: {tweets.length}</Typography>
+  let header = null;
+  if (props.title && props.multiple) {
+    header = (
+      <div className={classes.header}>
+        <Typography>
+          {props.title}: {items.length} found
+        </Typography>
         <div className={classes.pageNav}>
           <Typography>
-            Page {displayPage + 1} / {Math.ceil(tweets.length / 10)}
+            Page {displayPage + 1} / {Math.ceil(items.length / props.pageSize)}
           </Typography>
           <ButtonGroup size="small" variant="text" color="primary">
             <Button
@@ -101,24 +107,67 @@ const TweetBlock = props => {
               className={classes.button}
               aria-label="next page"
               onClick={() => updatePage(displayPage + 1)}
-              disabled={tweets.length <= (1 + displayPage) * 10}
+              disabled={items.length <= (1 + displayPage) * props.pageSize}
             >
               <NavigateNextIcon />
             </Button>
           </ButtonGroup>
         </div>
-      </div>}
-      {tweetSlice.map((result, i) => (
-        <div key={i} className={classes.resultCard}>
-          <TweetCard
-            data={result}
-            navigateTweet={navigateTweet}
-            expanded={false}
-          />
-        </div>
-      ))}
+      </div>
+    );
+  } else if (props.title) {
+    header = (
+      <div className={classes.header}>
+        <Typography>{props.title}</Typography>
+      </div>
+    );
+  }
+
+  let children;
+  if (props.noFlatten) {
+    children = (
+      <div
+        className={classes.resultCard}
+        style={{ minHeight: props.cardHeight }}
+      >
+        {React.cloneElement(props.children, {
+          data: itemsPage
+        })}
+      </div>
+    );
+  } else {
+    children = itemsPage.map((item, i) => (
+      <div
+        key={i}
+        className={classes.resultCard}
+        style={{ minHeight: props.cardHeight }}
+      >
+        {React.cloneElement(props.children, {
+          data: item
+        })}
+      </div>
+    ));
+  }
+  return (
+    <div>
+      {header}
+      <div className={classes.results}>{children}</div>
     </div>
   );
 };
 
-export default TweetBlock;
+BlockContainer.propTypes = {
+  query: PropTypes.string.isRequired,
+  cardHeight: PropTypes.string.isRequired,
+  title: PropTypes.string,
+  multiple: PropTypes.bool,
+  pageSize: PropTypes.number,
+  noFlatten: PropTypes.bool
+};
+
+BlockContainer.defaultProps = {
+  pageSize: 20,
+  noFlatten: false
+};
+
+export default BlockContainer;

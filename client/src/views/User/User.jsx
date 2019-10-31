@@ -3,7 +3,7 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
 
-import { UserBlock, HashtagBlock, TweetBlock } from "../../components";
+import { BlockContainer, UserCard, TweetCard, ScrollToTopOnMount, UserInsightCard } from "../../components";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -65,36 +65,37 @@ const User = props => {
   return u as users, collect(t)[..3] as tweets
 `;
 
-  const hashtagQuery = `
-  MATCH (u:User {screen_name: "${props.match.params.name}"})-[:COMMON_HASHTAG]->(h:Hashtag)
-WHERE u.leader=TRUE AND u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0
-return h
-order by h.topical_count desc, h.name desc
-  `;
-
   return (
     <div className={classes.page}>
+      <ScrollToTopOnMount />
       <Typography className={classes.resultsHeader} variant="h5">
         User Info
       </Typography>
       <div className={classes.resultsColumns}>
         <div className={classes.userResults}>
-          <UserBlock
-            query={userQuery}
-            expanded={true}
-            history={props.history}
-            topic={props.match.params.topic}
-            location={props.match.params.location}
-          />
+          <BlockContainer query={userQuery} cardHeight={"50px"}>
+            <UserCard
+              history={props.history}
+              topic={props.match.params.topic}
+              location={props.match.params.location}             
+            />
+          </BlockContainer>
+          <BlockContainer query={userQuery} cardHeight={"275px"}>
+            <UserInsightCard
+              topic={props.match.params.topic}
+              location={props.match.params.location}             
+            />
+          </BlockContainer>
         </div>
         <div className={classes.tweetResults}>
-          <TweetBlock
+          <BlockContainer
             query={tweetQuery}
-            expanded={true}
-            history={props.history}
-            topic={props.match.params.topic}
-            location={props.match.params.location}
-          />
+            cardHeight={"75px"}
+            title={"Retweets"}
+            multiple
+          >
+            <TweetCard expanded={false} history={props.history} />
+          </BlockContainer>
         </div>
       </div>
     </div>

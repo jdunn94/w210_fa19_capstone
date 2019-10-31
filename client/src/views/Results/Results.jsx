@@ -4,7 +4,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Divider } from "@material-ui/core";
 
 import { SearchBox } from "../../components";
-import { UserBlock, HashtagBlock, TweetBlock } from "../../components";
+import {
+  BlockContainer,
+  UserCard,
+  HashtagCard,
+  TweetCard
+} from "../../components";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -29,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     textAlign: "center"
   },
   hashtagResults: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(0),
     minHeight: "100px"
   },
   resultsColumns: {
@@ -102,32 +107,37 @@ order by h.topical_count desc, h.name desc
         <Divider variant="middle" />
         <div className={classes.resultsColumns}>
           <div className={classes.userResults}>
-            <UserBlock
+            <BlockContainer
               query={userQuery}
-              expanded={false}
-              history={props.history}
-              topic={props.match.params.topic}
-              location={props.match.params.location}
-            />
+              cardHeight={"275px"}
+              title={"User Community"}
+              multiple
+            >
+              <UserCard
+                history={props.history}
+                location={props.match.params.location}
+                topic={props.match.params.topic}
+                topicSpecific
+                profileLink
+              />
+            </BlockContainer>
           </div>
           <div className={classes.rightColumn}>
             <div className={classes.hashtagResults}>
-              <HashtagBlock
-                query={hashtagQuery}
-                expanded={false}
-                history={props.history}
-                topic={props.match.params.topic}
-                location={props.match.params.location}
-              />
+              <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
+                <HashtagCard />
+              </BlockContainer>
             </div>
             <div className={classes.tweetResults}>
-              <TweetBlock
+              <BlockContainer
                 query={tweetQuery}
-                expanded={false}
-                history={props.history}
-                topic={props.match.params.topic}
-                location={props.match.params.location}
-              />
+                cardHeight={"75px"}
+                title={"Popular Tweets"}
+                pageSize={10}
+                multiple
+              >
+                <TweetCard expanded={false} history={props.history} />
+              </BlockContainer>
             </div>
           </div>
         </div>

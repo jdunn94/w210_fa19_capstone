@@ -7,6 +7,7 @@
     "@material-ui/icons": "^4.4.3",
     "@material-ui/lab": "^4.0.0-alpha.28",
     "neo4j-driver": "^1.7.6",
+    "prop-types": "^15.7.2",
     "react": "^16.10.0",
     "react-dom": "^16.10.0",
     "react-router-dom": "^5.1.2",

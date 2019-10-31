@@ -1,4 +1,3 @@
-import { createContext } from "react";
 import { v1 as neo4j } from "neo4j-driver";
 
 import React from "react";

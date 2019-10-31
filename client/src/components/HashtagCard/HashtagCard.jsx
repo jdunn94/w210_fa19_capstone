@@ -51,8 +51,8 @@ const HashtagCard = props => {
   const showAll = event => {
     updateState(100000);
   };
-  const handleClick = event => {
-    props.navigateHashtag(event.currentTarget.id);
+  const handleClick = event => {    
+    props.history.push(`/hashtag/${event.currentTarget.id}/${props.topic}/${props.location}`);
   };
 
   const getColor = (max, current) => {
