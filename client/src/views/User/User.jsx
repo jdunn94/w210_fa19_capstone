@@ -77,7 +77,8 @@ const User = props => {
             <UserCard
               history={props.history}
               topic={props.match.params.topic}
-              location={props.match.params.location}             
+              location={props.match.params.location} 
+              withLocation     
             />
           </BlockContainer>
           <BlockContainer query={userQuery} cardHeight={"275px"}>

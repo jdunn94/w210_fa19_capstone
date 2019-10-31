@@ -148,7 +148,8 @@ UserCard.propTypes = {
   data: PropTypes.object,
   topic: PropTypes.string,
   location: PropTypes.string,
-  history: PropTypes.object
+  history: PropTypes.object,
+  withLocation: PropTypes.bool
 };
 
 export default UserCard;
