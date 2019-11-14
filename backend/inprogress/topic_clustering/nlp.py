@@ -196,10 +196,10 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
         tw_clean_lst = [spell(word) for word in tw_clean_lst]
         if keyword not in tw_clean_lst and found:
             raise Exception('after stemmer.stem, homelessness is gone.')
+        
+        tw_clean_lst = [word for word in tw_clean_lst if len(word) > MIN_SIZE_OF_WORD]
 
         if not simple_version:
-          tw_clean_lst = [word for word in tw_clean_lst if len(word) >
-              MIN_SIZE_OF_WORD]
           tw_clean_lst = [word for word in tw_clean_lst if word not in spwords]
         if len(tw_clean_lst) == 0:
           continue
