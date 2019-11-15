@@ -106,14 +106,8 @@ def extract_features(word_features, document, debug=False):
     return features
 
 
-def train_model(X, Y, model='BernoulliNB'):
+def train_model(X, Y, model, load_word_features):
     all_words = get_words_in_tweets(X)
-<<<<<<< HEAD
-    word_features = get_word_features(all_words)
-    with open(os.path.join('data', 'word_features.pkl'), 'wb') as f:
-        pickle.dump(word_features, f)
-        print('Save to data/word_features.pkl')
-=======
 
     filename = os.path.join('data', 'word_features.pkl')
     word_features = None
@@ -127,7 +121,6 @@ def train_model(X, Y, model='BernoulliNB'):
             word_features = pickle.load(f)
             print('Load ', filename)
 
->>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
     data_tuples = [(X[i], Y[i]) for i in range(0, len(X))]
     training_set = [(extract_features(word_features, document), label) for
                     (document, label) in data_tuples]
@@ -184,17 +177,13 @@ def predict_nb(raw_tweet_tuple, model='BernoulliNB', debug=False):
     return result
 
 
-<<<<<<< HEAD
-def main(training_filename, model, load=True):
-=======
 def main(
         training_filename,
         model,
         load_training_data=True,
         load_word_features=False):
->>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
     # load the raw tweets and train them.
-    if load:
+    if load_training_data:
         data = read_file(training_filename)
         (X, Y) = process_tweet(data)
     else:
@@ -203,13 +192,9 @@ def main(
         with open(os.path.join('data', 'Y.pkl'), 'rb') as f:
             Y = pickle.load(f)
     # start to train
-<<<<<<< HEAD
-    train_model(X, Y, model=model)
-=======
     train_model(X, Y, model=model, load_word_features=load_word_features)
     # smoke_test()
 
->>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
 
 def smoke_test():
     print('\n*Starting to do smoke test*')
@@ -236,11 +221,6 @@ def smoke_test():
 if __name__ == '__main__':
     if (len(sys.argv) < 3):
         raise Exception(
-<<<<<<< HEAD
-            '{} training_file.csv SVC(BernoulliNB)'.format(
-                sys.argv[0]))
-    main(training_filename=sys.argv[1], model=sys.argv[2])
-=======
             '{} training_file.csv SVC(BernoulliNB) load_word_features'.format(
                 sys.argv[0]))
 
@@ -254,4 +234,3 @@ if __name__ == '__main__':
          model=sys.argv[2],
          load_training_data=load_training_data,
          load_word_features=load_word_features)
->>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
