@@ -1,4 +1,5 @@
-# This file read training.csv, then create token file X.pkl and label vector file Y.plk.
+# This file read training.csv, then create token file X.pkl and label
+# vector file Y.plk.
 
 from __future__ import absolute_import
 from __future__ import division
@@ -15,22 +16,19 @@ import collections
 import nltk  # Natural Language Processing
 import os
 import pickle
-
-# nltk.download('punkt')
-# nltk.download('all')
+import constants
 
 from nltk.stem.wordnet import WordNetLemmatizer
-from nltk.corpus import stopwords  # list of words
 from collections import Counter  # optimized way to do this
 import string  # list(string.punctuation) - produces a list of punctuations
 import copy
 from itertools import product, tee, combinations, chain
 from nltk.stem import PorterStemmer
 from operator import itemgetter  # help with dataframes
-
 from autocorrect import Speller
 
 MIN_SIZE_OF_WORD = 2
+
 
 def nlp(tweets_vector, cluster_list, simple_version=False):
     emoticons_str = r"""
@@ -72,9 +70,9 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
 
     rem_bracket = r'(' + '|'.join([sq_br_f, sq_br_b]) + ')'
     rem_bracketC = re.compile(rem_bracket, re.VERBOSE)
-    
+
     MIN_SIZE_OF_WOR = 2
-    
+
     short_words = r'\W*\b\w{1,2}\b'  # Remove Short words
     short_wordsC = re.compile(short_words, re.VERBOSE | re.IGNORECASE)
 
@@ -105,40 +103,21 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
 
     char_remove = [']', '[', '(', ')', '{', '}']  # characters to be removed
     emotion_list = [':)', ';)', '(:', '(;', '}', '{', '}']
-    word_garb = [
-        'thats',
-        'youre',
-        'thanks',
-        'hasn',
-        'https',
-        'wanna',
-        'gonna',
-        'aint',
-        'havent',
-        'dont',
-        'cant',
-        'werent',
-        'u',
-        'isnt',
-        'theyre',
-        'shes',
-        'youve',
-        'youll',
-        'weve',
-        'theyve',
-        'amp',
-        'doesnt',
-        'ive']
 
-    exclude = list(string.punctuation) + emotion_list + word_garb
-    if simple_version:
-      exclude = list(string.punctuation) + emotion_list
+    exclude = list(string.punctuation)
+
+    if not simple_version:
+        exclude.extend(emotion_list)
+        exclude.extend(constants.word_garb)
+        exclude.extend(constants.topic_stop_words)
+    else:
+        exclude.extend(constants.sentiment_stop_words)
+        exclude.extend(constants.sentiment_extra_stop_words)
+    # print(exclude)
 
     # Convert tuple to a list, then to a string; Remove the characters; Stays
     stemmer = PorterStemmer()
     lmtzr = WordNetLemmatizer()
-    spwords = set(stopwords.words('english'))
-    spwords.add(('everyone', 'one', 'person', 're', 'someone', 'today'))
 
     # Auto spelling corrector in python3
     spell = Speller(lang='en')
@@ -169,13 +148,12 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
         tw_clean = re.sub(r'(?:^|\s)[@#].*?(?=[,;:.!?]|\s|$)', r'', tw_clean)
         tw_clean = re.sub(r'/', r' ', tw_clean)
         tw_clean_lst = re.findall(r'\w+', str(tw_clean))
-
-        tw_clean_lst = [word.lower()
-                        for word in tw_clean_lst if word not in exclude]
-
+        tw_clean_lst = [word.lower() for word in tw_clean_lst]
+        tw_clean_lst = [word for word in tw_clean_lst if word not in exclude]
         # Keeps only nouns
         if not simple_version:
-          tw_clean_lst = [word[0] for word in nltk.pos_tag(tw_clean_lst) if word[1].startswith('N')]
+            tw_clean_lst = [word[0] for word in nltk.pos_tag(
+                tw_clean_lst) if word[1].startswith('N')]
 
         found = False
         keyword = 'homelessness'
@@ -196,13 +174,12 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
         tw_clean_lst = [spell(word) for word in tw_clean_lst]
         if keyword not in tw_clean_lst and found:
             raise Exception('after stemmer.stem, homelessness is gone.')
-        
-        tw_clean_lst = [word for word in tw_clean_lst if len(word) > MIN_SIZE_OF_WORD]
 
-        if not simple_version:
-          tw_clean_lst = [word for word in tw_clean_lst if word not in spwords]
+        tw_clean_lst = [
+            word for word in tw_clean_lst if len(word) > MIN_SIZE_OF_WORD]
+
         if len(tw_clean_lst) == 0:
-          continue
+            continue
 
         X.append(tw_clean_lst)
         Y.append(cluster)

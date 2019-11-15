@@ -1,11 +1,12 @@
 # Take tweets from training dataset, then train classificer.
 
+import constants
+import nltk
 import numpy as np
 import os
 import pandas as pd
 import pickle
 import sys
-import nltk
 
 from collections import Counter
 from collections import namedtuple
@@ -14,6 +15,7 @@ from nltk.classify import apply_features
 from nltk.classify.scikitlearn import SklearnClassifier
 from nltk.probability import FreqDist
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.svm import SVC
 
 # Raw_tweet is a data structure used for prediction
 RawTweet = namedtuple('RawTweet', ['id', 'text',
@@ -70,25 +72,25 @@ def get_words_in_tweets(X):
     """
     X is a list of list of tokens. Tokens are from nlp.py
     """
+    stop_words = constants.sentiment_stop_words
+    stop_words.extend(constants.sentiment_extra_stop_words)
     all_words = []
     for words in X:
-        all_words.extend(words)
+        cleaned_words = [word for word in words if word not in stop_words]
+        all_words.extend(cleaned_words)
     return all_words
 
 
-def get_word_features(wordlist, vocab_size=3000):
+def get_word_features(wordlist, vocab_size=1000):
     counter = Counter(wordlist)
     counter = Counter(counter.most_common(vocab_size))
     total = sum(counter.values(), 0.0)
     word_features = {}
     for word in counter:
         word_features[word[0]] = word[1] / total
-    i = 0
-    for k, v in word_features.items():
-      i += 1
-      print('{}:\t{}={}'.format(i,k,v))
-      if i >= 100:
-        break
+    with open(os.path.join('data', 'words.txt'), 'w') as f:
+        for k, v in word_features.items():
+            f.write("'{}',".format(k))
     return word_features
 
 
@@ -98,13 +100,13 @@ def extract_features(word_features, document, debug=False):
     for word in word_features:
         features[word] = (word_features[word] if word in document_words else 0)
     if debug:
-        for word,score in features.items():
+        for word, score in features.items():
             if score > 0:
                 print('{}={}'.format(word, score))
     return features
 
 
-def train_nb(X, Y):
+def train_model(X, Y, model='BernoulliNB'):
     all_words = get_words_in_tweets(X)
     word_features = get_word_features(all_words)
     with open(os.path.join('data', 'word_features.pkl'), 'wb') as f:
@@ -113,18 +115,26 @@ def train_nb(X, Y):
     data_tuples = [(X[i], Y[i]) for i in range(0, len(X))]
     training_set = [(extract_features(word_features, document), label) for
                     (document, label) in data_tuples]
-    BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
-    BernoulliNB_classifier.train(training_set)
+    classifier = None
+    if model == "BernoulliNB":
+        classifier = SklearnClassifier(BernoulliNB())
+    elif model == "SVC":
+        classifier = SklearnClassifier(SVC(gamma='auto'))
+    else:
+        raise Exception('Unknown model:'.format(model))
+
+    classifier.train(training_set)
     # Test training accuracy
     test_set = training_set[:1000]
-    print("BernoulliNB_classifier on first 1000 training set accuracy percent:",
-          (nltk.classify.accuracy(BernoulliNB_classifier, test_set)) * 100)
-    with open(os.path.join('data', 'BernoulliNB.pkl'), 'wb') as f:
-        pickle.dump(BernoulliNB_classifier, f)
-        print('Save to model: BernoulliNB.pkl')
+    print("test on first 1000 training set accuracy percent:",
+          (nltk.classify.accuracy(classifier, test_set)) * 100)
+
+    with open(os.path.join('data', '{}.pkl'.format(model)), 'wb') as f:
+        pickle.dump(classifier, f)
+        print('Save to model: {}.pkl'.format(model))
 
 
-def predict_nb(raw_tweet_tuple, debug=False):
+def predict_nb(raw_tweet_tuple, model='BernoulliNB', debug=False):
     """
     This function takes a RawTweet which is a (id, tweet, dummy_sentiment),
     returns a new RawTweet which has a predicted sentiment.
@@ -145,12 +155,12 @@ def predict_nb(raw_tweet_tuple, debug=False):
         word_features = pickle.load(f)
         print('Load data/word_features.pkl with size {}'.format(len(word_features)))
     test = extract_features(word_features, test_X[0], debug=debug)
-    with open(os.path.join('data', 'BernoulliNB.pkl'), 'rb') as f:
-        BernoulliNB_classifier = pickle.load(f)
-        print('Load data/BernoulliNB.pkl')
+    with open(os.path.join('data', '{}.pkl'.format(model)), 'rb') as f:
+        classifier = pickle.load(f)
+        print('Load data/{}.pkl'.format(model))
         if DEBUG:
             print('test=', test)
-        sentiment = BernoulliNB_classifier.classify(test)
+        sentiment = classifier.classify(test)
         if DEBUG:
             print('sentiment = ', sentiment)
         result = RawTweet(id=raw_tweet_tuple.id, text=raw_tweet_tuple.text,
@@ -158,35 +168,42 @@ def predict_nb(raw_tweet_tuple, debug=False):
     return result
 
 
-def main(data_filename, load=True):
+def main(training_filename, model, load=True):
     # load the raw tweets and train them.
     if load:
-        data = read_file(data_filename)
+        data = read_file(training_filename)
         (X, Y) = process_tweet(data)
     else:
         with open(os.path.join('data', 'tokens.pkl'), 'rb') as f:
             X = pickle.load(f)
         with open(os.path.join('data', 'Y.pkl'), 'rb') as f:
             Y = pickle.load(f)
-    train_nb(X, Y)
+    # start to train
+    train_model(X, Y, model=model)
 
     positive_text = "@switchfoot http://twitpic.com/2y1zl - Awww, that's a bummer.  You shoulda got David Carr of Third Day to do it. ;D"
     raw_tweet_tuple = RawTweet(
         id='111',
         text=positive_text,
         sentiment='unknown')
-    new_tweet_tuple = predict_nb(raw_tweet_tuple, debug=True)
+    new_tweet_tuple = predict_nb(raw_tweet_tuple, model=model, debug=True)
     print('Predict result=', new_tweet_tuple)
     negative_text = "@Cliff_Forster Yeah, that does work better than just waiting for it In the end I just wonder if I have time to keep up a good blog."
     raw_tweet_tuple = RawTweet(
         id='111',
         text=negative_text,
         sentiment='unknown')
-    new_tweet_tuple = predict_nb(raw_tweet_tuple, debug=True)
+    new_tweet_tuple = predict_nb(raw_tweet_tuple, model=model, debug=True)
+    print('Predict result=', new_tweet_tuple)
+    neutral = RawTweet(id='111', text="a b",
+                       sentiment='unknown')
+    new_tweet_tuple = predict_nb(neutral, model=model, debug=True)
     print('Predict result=', new_tweet_tuple)
 
 
 if __name__ == '__main__':
-    if (len(sys.argv) < 2):
-        raise Exception('{} training_file.csv'.format(sys.argv[0]))
-    main(sys.argv[1])
+    if (len(sys.argv) < 3):
+        raise Exception(
+            '{} training_file.csv SVC(BernoulliNB)'.format(
+                sys.argv[0]))
+    main(training_filename=sys.argv[1], model=sys.argv[2])
