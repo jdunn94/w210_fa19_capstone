@@ -10,8 +10,8 @@ def test_single_tweet():
     raw_tweet_tuple = RawTweet(id='111', text=text, sentiment='')
     new_tweet_tuple = predict_nb(
         raw_tweet_tuple,
-        # model='BernoulliNB',
-        model='SVC',
+        model='BernoulliNB',
+        #model='SVC',
         debug=False)
     print('Predict result=', new_tweet_tuple)
 
