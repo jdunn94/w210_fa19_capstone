@@ -108,10 +108,26 @@ def extract_features(word_features, document, debug=False):
 
 def train_model(X, Y, model='BernoulliNB'):
     all_words = get_words_in_tweets(X)
+<<<<<<< HEAD
     word_features = get_word_features(all_words)
     with open(os.path.join('data', 'word_features.pkl'), 'wb') as f:
         pickle.dump(word_features, f)
         print('Save to data/word_features.pkl')
+=======
+
+    filename = os.path.join('data', 'word_features.pkl')
+    word_features = None
+    if not load_word_features:
+        word_features = get_word_features(all_words)
+        with open(filename, 'wb') as f:
+            pickle.dump(word_features, f)
+            print('Save to ', filename)
+    else:
+        with open(filename, 'rb') as f:
+            word_features = pickle.load(f)
+            print('Load ', filename)
+
+>>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
     data_tuples = [(X[i], Y[i]) for i in range(0, len(X))]
     training_set = [(extract_features(word_features, document), label) for
                     (document, label) in data_tuples]
@@ -125,8 +141,8 @@ def train_model(X, Y, model='BernoulliNB'):
 
     classifier.train(training_set)
     # Test training accuracy
-    test_set = training_set[:1000]
-    print("test on first 1000 training set accuracy percent:",
+    test_set = training_set[:2000]
+    print("test on first 2000 training set accuracy percent:",
           (nltk.classify.accuracy(classifier, test_set)) * 100)
 
     with open(os.path.join('data', '{}.pkl'.format(model)), 'wb') as f:
@@ -168,7 +184,15 @@ def predict_nb(raw_tweet_tuple, model='BernoulliNB', debug=False):
     return result
 
 
+<<<<<<< HEAD
 def main(training_filename, model, load=True):
+=======
+def main(
+        training_filename,
+        model,
+        load_training_data=True,
+        load_word_features=False):
+>>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
     # load the raw tweets and train them.
     if load:
         data = read_file(training_filename)
@@ -179,8 +203,16 @@ def main(training_filename, model, load=True):
         with open(os.path.join('data', 'Y.pkl'), 'rb') as f:
             Y = pickle.load(f)
     # start to train
+<<<<<<< HEAD
     train_model(X, Y, model=model)
+=======
+    train_model(X, Y, model=model, load_word_features=load_word_features)
+    # smoke_test()
 
+>>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
+
+def smoke_test():
+    print('\n*Starting to do smoke test*')
     positive_text = "@switchfoot http://twitpic.com/2y1zl - Awww, that's a bummer.  You shoulda got David Carr of Third Day to do it. ;D"
     raw_tweet_tuple = RawTweet(
         id='111',
@@ -204,6 +236,22 @@ def main(training_filename, model, load=True):
 if __name__ == '__main__':
     if (len(sys.argv) < 3):
         raise Exception(
+<<<<<<< HEAD
             '{} training_file.csv SVC(BernoulliNB)'.format(
                 sys.argv[0]))
     main(training_filename=sys.argv[1], model=sys.argv[2])
+=======
+            '{} training_file.csv SVC(BernoulliNB) load_word_features'.format(
+                sys.argv[0]))
+
+    load_word_features = False
+    load_training_data = True
+    if len(sys.argv) >= 4 and sys.argv[3] == 'load_word_features':
+        load_word_features = True
+        load_training_data = False
+
+    main(training_filename=sys.argv[1],
+         model=sys.argv[2],
+         load_training_data=load_training_data,
+         load_word_features=load_word_features)
+>>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.

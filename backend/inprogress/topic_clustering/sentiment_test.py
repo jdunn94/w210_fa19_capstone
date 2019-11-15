@@ -8,7 +8,15 @@ from sentiment import RawTweet
 def test_single_tweet():
     text = "@switchfoot http://twitpic.com/2y1zl - Awww, that's a bummer.  You shoulda got David Carr of Third Day to do it. ;D"
     raw_tweet_tuple = RawTweet(id='111', text=text, sentiment='')
+<<<<<<< HEAD
     new_tweet_tuple = predict_nb(raw_tweet_tuple)
+=======
+    new_tweet_tuple = predict_nb(
+        raw_tweet_tuple,
+        # model='BernoulliNB',
+        model='SVC',
+        debug=False)
+>>>>>>> 60d5897... Modified script to load wordfeatures instead of nlp each time.
     print('Predict result=', new_tweet_tuple)
 
 
