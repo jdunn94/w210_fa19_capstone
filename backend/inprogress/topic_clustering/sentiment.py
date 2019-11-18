@@ -81,7 +81,7 @@ def get_words_in_tweets(X):
     return all_words
 
 
-def get_word_features(wordlist, vocab_size=1000):
+def get_word_features(wordlist, vocab_size=3000):
     counter = Counter(wordlist)
     counter = Counter(counter.most_common(vocab_size))
     total = sum(counter.values(), 0.0)
