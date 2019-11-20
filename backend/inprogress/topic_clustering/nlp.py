@@ -30,7 +30,7 @@ from autocorrect import Speller
 MIN_SIZE_OF_WORD = 2
 
 
-def nlp(tweets_vector, cluster_list, simple_version=False):
+def nlp(tweets_vector, simple_version=False):
     emoticons_str = r"""
     (?:
     [:=;] # Eyes
@@ -124,11 +124,9 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
 
     # a list of list of tokens
     X = list()
-    Y = list()
     counter = 1
     for i in range(len(outlist_init)):
         tweet = outlist_init[i]
-        cluster = cluster_list[i]
         if counter % 100 == 0:
             print('Proccessed tweets:', counter)
         tw_clean = []
@@ -178,14 +176,10 @@ def nlp(tweets_vector, cluster_list, simple_version=False):
         tw_clean_lst = [
             word for word in tw_clean_lst if len(word) > MIN_SIZE_OF_WORD]
 
-        if len(tw_clean_lst) == 0:
-            continue
-
         X.append(tw_clean_lst)
-        Y.append(cluster)
         counter += 1
 
-    return (X, Y)
+    return (X)
     # end of nlp func
 
 

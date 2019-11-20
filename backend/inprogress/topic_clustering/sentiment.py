@@ -54,13 +54,11 @@ def read_file(CSV_FILENAME):
 
 def process_tweet(data):
     tweets = data['text']
-    labels = data['sentiment']
-    (X, Y) = nlp(tweets, labels, simple_version=True)
+    Y = data['sentiment']
+    X = nlp(tweets, simple_version=True)
     if DEBUG:
         print('size of X:', len(X))
-        print('size of Y:', len(Y))
         print('sample of X:', X[1:10])
-        print('sample fo Y:', Y[1:10])
     with open(os.path.join('data', 'tokens.pkl'), 'wb') as f:
         pickle.dump(X, f)
     with open(os.path.join('data', 'Y.pkl'), 'wb') as f:
@@ -143,38 +141,74 @@ def train_model(X, Y, model, load_word_features):
         print('Save to model: {}.pkl'.format(model))
 
 
-def predict_nb(raw_tweet_tuple, model='BernoulliNB', debug=False):
+def predict_nb_batch(
+        raw_tweet_tuple_list,
+        model='SVC',
+        debug=False):
+    tweets = []
+    for t in raw_tweet_tuple_list:
+        tweets.append(t.text)
+    labels = predict(tweets, model=model, debug=debug)
+    if len(tweets) != len(labels):
+        raise Exception('tweets len != labels len'.format(len(tweets),
+                                                          len(labels)))
+    result = []
+    for i in range(len(raw_tweet_tuple_list)):
+        t = raw_tweet_tuple_list[i]
+        result.append(RawTweet(
+          id=t.id,
+          text=t.text, 
+          sentiment=labels[i]))
+    return result 
+
+
+def predict_nb(
+    raw_tweet_tuple, 
+    model='SVC', 
+    debug=False):
     """
     This function takes a RawTweet which is a (id, tweet, dummy_sentiment),
     returns a new RawTweet which has a predicted sentiment.
     """
-    tweets = np.array([raw_tweet_tuple.text])
-    labels = ['unknown']
+    tweets = [raw_tweet_tuple.text]
+    labels = predict(tweets, model=model, debug=debug)
+    return RawTweet(id=raw_tweet_tuple.id, text=raw_tweet_tuple.text,
+                    sentiment=labels[0])
+
+
+def predict(tweets, model='SVC', debug=False):
+    tweets = np.array(tweets)
+    labels = ['unknown' for tweet in tweets]
 
     # Process text to get tokens into test_X.
-    (test_X, test_Y) = nlp(tweets, labels, simple_version=True)
-
-    if len(test_X) == 0:
-        return RawTweet(id=raw_tweet_tuple.id, text=raw_tweet_tuple.text,
-                        sentiment='unknown')
+    test_X = nlp(tweets, simple_version=True)
 
     # Get features from tokens
-    word_features = None
-    with open(os.path.join('data', 'word_features.pkl'), 'rb') as f:
-        word_features = pickle.load(f)
-        print('Load data/word_features.pkl with size {}'.format(len(word_features)))
-    test = extract_features(word_features, test_X[0], debug=debug)
-    with open(os.path.join('data', '{}.pkl'.format(model)), 'rb') as f:
-        classifier = pickle.load(f)
-        print('Load data/{}.pkl'.format(model))
+    word_features_file = open(os.path.join('data', 'word_features.pkl'), 'rb')
+    word_features = pickle.load(word_features_file)
+    print('Load data/word_features.pkl with size {}'.format(len(word_features)))
+    word_features_file.close()
+    # Get model
+    model_file = open(os.path.join('data', '{}.pkl'.format(model)), 'rb')
+    classifier = pickle.load(model_file)
+    model_file.close()
+    print('Load data/{}.pkl'.format(model))
+
+    if len(tweets) != len(test_X):
+        raise Exception(
+            'tweets len {} != features vectors len {}'.format(
+                len(tweets), len(test_X)))
+
+    # Predict
+    for i in range(len(test_X)):
+        if len(test_X[i]) == 0:
+            continue
+        test = extract_features(word_features, test_X[i], debug=debug)
         if DEBUG:
             print('test=', test)
-        sentiment = classifier.classify(test)
-        if DEBUG:
-            print('sentiment = ', sentiment)
-        result = RawTweet(id=raw_tweet_tuple.id, text=raw_tweet_tuple.text,
-                          sentiment=sentiment)
-    return result
+        labels[i] = classifier.classify(test)
+
+    return labels
 
 
 def main(
