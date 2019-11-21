@@ -57,13 +57,13 @@ def test_batch():
   for i in range(len(tweets)):
     test = RawTweet(id=ids[i], text=tweets[i], sentiment='unknown')
     tests.append(test)
-  predicted = predict_nb_batch(tests, model='SVC', debug=False)
+  predicted = predict_nb_batch(tests, model='SVC', debug=True)
   pred_labels = []
   for i in range(len(predicted)):
     tweet = predicted[i]
     pred_labels.append(tweet.sentiment)
     if (labels[i] != tweet.sentiment):
-      print('Missed:{}\n{}\ntrue_label:{}, predicted:{}\n\n'.format( 
+      print('Missed:{}\n{}\ntrue_label:{}, predicted:{}\n\n'.format(
           tweet.text, tests[i], labels[i], tweet.sentiment))
 
   #print(labels)

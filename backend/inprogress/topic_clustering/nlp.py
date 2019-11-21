@@ -126,9 +126,10 @@ def nlp(tweets_vector, simple_version=False):
     X = list()
     counter = 1
     for i in range(len(outlist_init)):
-        tweet = outlist_init[i]
         if counter % 100 == 0:
             print('Proccessed tweets:', counter)
+        counter += 1
+        tweet = outlist_init[i]
         tw_clean = []
         tw_clean = [ch for ch in tweet if ch not in char_remove]
         tw_clean = re.sub(URL, "", str(tw_clean))
@@ -148,36 +149,19 @@ def nlp(tweets_vector, simple_version=False):
         tw_clean_lst = re.findall(r'\w+', str(tw_clean))
         tw_clean_lst = [word.lower() for word in tw_clean_lst]
         tw_clean_lst = [word for word in tw_clean_lst if word not in exclude]
+
         # Keeps only nouns
-        if not simple_version:
+        if not simple_version and len(tw_clean_lst) >= 2:
             tw_clean_lst = [word[0] for word in nltk.pos_tag(
                 tw_clean_lst) if word[1].startswith('N')]
 
-        found = False
-        keyword = 'homelessness'
-        if keyword in tw_clean_lst:
-            found = True
-
         # Lemma, stem
         tw_clean_lst = [lmtzr.lemmatize(word) for word in tw_clean_lst]
-        if keyword not in tw_clean_lst and found:
-            raise Exception('after lmtzr.lemmatize, homelessness is gone.')
-
-        # Remove stem since it cleaned homelessness to homeless.
-        #tw_clean_lst = [stemmer.stem(word) for word in tw_clean_lst]
-        # if keyword not in tw_clean_lst and found:
-        #  print(tw_clean_lst)
-        #  raise Exception('after stemmer.stem, homelessness is gone.')
-
         tw_clean_lst = [spell(word) for word in tw_clean_lst]
-        if keyword not in tw_clean_lst and found:
-            raise Exception('after stemmer.stem, homelessness is gone.')
-
         tw_clean_lst = [
             word for word in tw_clean_lst if len(word) > MIN_SIZE_OF_WORD]
 
         X.append(tw_clean_lst)
-        counter += 1
 
     return (X)
     # end of nlp func

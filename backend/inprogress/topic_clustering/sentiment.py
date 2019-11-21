@@ -204,9 +204,10 @@ def predict(tweets, model='SVC', debug=False):
         if len(test_X[i]) == 0:
             continue
         test = extract_features(word_features, test_X[i], debug=debug)
-        if DEBUG:
-            print('test=', test)
         labels[i] = classifier.classify(test)
+        if DEBUG:
+          print('features:', test)
+          print('sentiment:', labels[i])
 
     return labels
 
