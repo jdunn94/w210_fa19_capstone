@@ -28,7 +28,15 @@ const useStyles = makeStyles({
     marginBottom: 12
   },
   quotedTweet: {
-    background: grey[300]
+    //background: grey[300]
+    display: "block !important",
+    margin: "5px 0 !important",
+    padding: "7px 0 !important",
+    background: "#ebebeb !important",
+    color: "#1f1f1f !important",
+    textDecoration: "none !important",
+    borderRadius: "13px !important",
+    boxShadow: "-1px -1px 2px #d6d6d6 !important",   
   },
   userInfo: {
     display: "flex",

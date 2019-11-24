@@ -52,16 +52,6 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column"
   },
   tweetResults: {
-    display:"block !important",
-    //width: "300px !important",
-    margin: "5px 0 !important",
-    padding: "7px 0 !important",
-    background: "#fff !important",
-    color: "#000 !important",
-    textDecoration: "none !important",
-    borderRadius: "13px !important",
-    //textAlign: "center !important",
-    boxShadow: "-1px -1px 2px #555 !important",
   }
 }));
 

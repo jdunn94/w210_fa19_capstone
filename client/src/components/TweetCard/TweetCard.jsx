@@ -6,6 +6,8 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import { Typography, Link } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
+import logo from './logo.png';
+import heart from './heart.png';
 
 const useStyles = makeStyles({
   card: {
@@ -23,7 +25,15 @@ const useStyles = makeStyles({
     marginBottom: 12
   },
   quotedTweet: {
-    background: grey[300]
+    //background: grey[300]
+    display: "block !important",
+    margin: "5px 0 !important",
+    padding: "7px 0 !important",
+    background: "#858585 !important",
+    color: "#fff !important",
+    textDecoration: "none !important",
+    borderRadius: "13px !important",
+    boxShadow: "-1px -1px 2px #555 !important", 
   },
   userInfo: {
     display: "flex",
@@ -36,6 +46,17 @@ const useStyles = makeStyles({
   },
   keyValueText: {
     display: "flex"
+  },
+  entryTitle: {
+    fontFamily: "Arial, sans-serif !important",
+    padding: "5px !important",
+    maxWidth: "300px !important",
+  },
+  entrySubtitle: {
+    fontFamily: "Arial, sans-serif !important",
+    padding: "5px !important",
+    fontSize: 13,
+    color: "#5c5c5c !important",
   }
 });
 
@@ -62,21 +83,26 @@ const TweetCard = props => {
             color="inherit"
             variant="h6"
             gutterBottom
+	    className={classes.entryTitle}
           >
-            @{props.data.get("users").properties.screen_name}:{" "}
+	  @{props.data.get("users").properties.screen_name}:{" "}
+          </Link>
+	  <img src={logo} alt="Logo" align="right"/>
+	  <p className={classes.entrySubtitle}>
             {new Date(
               props.data.get("tweets").properties.created_at_date.toString()
             ).toLocaleDateString() +" " + new Date(
               props.data.get("tweets").properties.created_at_date.toString()
             ).toLocaleTimeString() || "n/a creation"}
-          </Link>
-        </Typography>
+	  </p>
+	</Typography>
         <Typography className={classes.quotedTweet} gutterBottom>
           {props.data.get("tweets").properties.text}
         </Typography>
         <div>
           <Typography variant="body2" component="p">
-            Retweets:{" "}
+            <img src={heart} alt="Heart" align="left"/>
+	    Retweets:{" "}
             {!!props.data.get("tweets").properties.retweet_count
               ? props.data.get("tweets").properties.retweet_count.toString()
               : "n/a"}{" "}
