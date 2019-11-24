@@ -14,9 +14,9 @@ def test_single_tweet():
     raw_tweet_tuple = RawTweet(id='111', text=text, sentiment='')
     new_tweet_tuple = predict_nb(
         raw_tweet_tuple,
-        #model='BernoulliNB',
-        model='SVC',
-        debug=False)
+        model='BernoulliNB',
+        #model='SVC',
+        debug=True)
     print('Predict result=', new_tweet_tuple)
 
 
@@ -57,7 +57,11 @@ def test_batch():
   for i in range(len(tweets)):
     test = RawTweet(id=ids[i], text=tweets[i], sentiment='unknown')
     tests.append(test)
-  predicted = predict_nb_batch(tests, model='SVC', debug=True)
+  predicted = predict_nb_batch(
+      tests, 
+      model='BernoulliNB', 
+      #model='SVC',
+      debug=True)
   pred_labels = []
   for i in range(len(predicted)):
     tweet = predicted[i]
