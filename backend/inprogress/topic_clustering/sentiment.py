@@ -98,9 +98,11 @@ def extract_features(word_features, document, debug=False):
     for word in word_features:
         features[word] = (word_features[word] if word in document_words else 0)
     if debug:
+        print('\nTweet:', document_words)
         for word, score in features.items():
             if score > 0:
                 print('{}={}'.format(word, score))
+        print('\n')
     return features
 
 
@@ -178,7 +180,7 @@ def predict_nb(
 
 def predict(tweets, model='SVC', debug=False):
     tweets = np.array(tweets)
-    labels = ['unknown' for tweet in tweets]
+    labels = ['positive' for tweet in tweets]
 
     # Process text to get tokens into test_X.
     test_X = nlp(tweets, simple_version=True)

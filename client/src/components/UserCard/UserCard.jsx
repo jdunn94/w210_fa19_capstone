@@ -8,6 +8,8 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { grey } from "@material-ui/core/colors";
 import PropTypes from "prop-types";
+import logo from './logo.png';
+import heart from './heart.png';
 
 const useStyles = makeStyles({
   card: {
@@ -19,7 +21,8 @@ const useStyles = makeStyles({
     transform: "scale(0.8)"
   },
   title: {
-    fontSize: 14
+    fontFamily: "Arial, sans-serif !important",
+    fontSize: "14px !important",
   },
   pos: {
     marginBottom: 12
@@ -38,6 +41,11 @@ const useStyles = makeStyles({
   },
   keyValueText: {
     display: "flex"
+  },
+  entryTitle: {
+    fontFamily: "Arial, sans-serif !important",
+    padding: "5px !important",
+    maxWidth: "300px !important",
   }
 });
 
@@ -124,12 +132,15 @@ const UserCard = props => {
             color="inherit"
             variant="h6"
             gutterBottom
+	    className={classes.entryTitle}
+	    activeStyle={{ color: '#00acee' }}
           >
             @{props.data.get("users").properties.screen_name}
           </Link>
+	  <img src={logo} alt="Logo" align="right"/>
         </Typography>
         <Typography variant="body2" component="p">
-          {headline}
+          <img src={heart} alt="Heart" align="left"/>{headline}
         </Typography>
         {props.topicSpecific && role}
         <Typography variant="body2" component="p">

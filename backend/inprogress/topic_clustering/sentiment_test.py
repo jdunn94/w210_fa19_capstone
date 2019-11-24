@@ -16,7 +16,7 @@ def test_single_tweet():
         raw_tweet_tuple,
         #model='BernoulliNB',
         model='SVC',
-        debug=True)
+        debug=False)
     print('Predict result=', new_tweet_tuple)
 
 
@@ -48,7 +48,7 @@ def read_file(CSV_FILENAME, DEBUG=False):
     return data
 
 def test_batch():
-  test_filename = os.path.join('data', 'test_100.csv')
+  test_filename = os.path.join('data', 'test_1k.csv')
   data = read_file(test_filename)
   ids = data['id']
   tweets = data['text']
