@@ -31,11 +31,11 @@ const useStyles = makeStyles({
     display: "block !important",
     margin: "5px 0 !important",
     padding: "7px 0 !important",
-    background: "#ebebeb !important",
+    //background: "#ebebeb !important",
     color: "#1f1f1f !important",
     textDecoration: "none !important",
     borderRadius: "13px !important",
-    boxShadow: "-1px -1px 2px #d6d6d6 !important", 
+    boxShadow: "-1px -1px 1px #d6d6d6 !important", 
   },
   userInfo: {
     display: "flex",
@@ -52,12 +52,15 @@ const useStyles = makeStyles({
   entryTitle: {
     fontFamily: "Arial, sans-serif !important",
     padding: "5px !important",
-    maxWidth: "300px !important",
+    fontWeight: "bold", 
+    fontSize: "18px",
+    color: "#292929",
+    //maxWidth: "300px !important",
   },
   entrySubtitle: {
     fontFamily: "Arial, sans-serif !important",
     padding: "5px !important",
-    fontSize: 13,
+    fontSize: "14px",
     color: "#5c5c5c !important",
     borderRadius: "13px !important",
     textDecoration: "none !important",
@@ -65,7 +68,16 @@ const useStyles = makeStyles({
   icon: {
     padding: "10 10px",
     float: "left",
-  }
+  },
+  table: {
+    border: "4px solid white",
+    borderCollapse: "collapse",
+  },
+  th: {
+    border: "0px solid white",
+    padding: "0px",
+    textAlign: "left",
+  },
 });
 
 const TweetCard = props => {
@@ -79,6 +91,12 @@ const TweetCard = props => {
     <Card className={classes.card}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
+	  <table width="100%" className={classes.table}>
+	  <tr className={classes.th}>
+	  <td className={classes.th} rowspan="2">
+	    <img src={person} alt="Person" className={classes.icon}/>
+	  </td>
+	  <td className={classes.th}>
 	  <Link
             href={
               "https://twitter.com/" +
@@ -93,10 +111,18 @@ const TweetCard = props => {
             gutterBottom
 	    className={classes.entryTitle}
           >
-	    <img src={person} alt="Person" className={classes.icon}/>
-	    @{props.data.get("users").properties.screen_name}:{" "}
-            <img src={logo} alt="Logo" align="right"/>
-	  </Link>
+	    {props.data.get("users").properties.name}
+          </Link>
+	  </td>
+	  <td width="60%" className={classes.th} rowspan="2">
+	  <img src={logo} alt="Logo" align="right"/>
+	  </td>
+	  </tr>
+	  <tr lassName={classes.th}>
+	  <td className={classes.entrySubtitle}>
+	  @{props.data.get("users").properties.screen_name}
+	  </td></tr>
+	  </table>
         </Typography>
         <Typography className={classes.quotedTweet} gutterBottom>
           {props.data.get("tweets").properties.text}
