@@ -12,7 +12,8 @@ import { blue } from "@material-ui/core/colors";
 const useStyles = makeStyles(theme => ({
   card: {
     minWidth: 275,
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    maxHeight: "100%"
   },
   bullet: {
     display: "inline-block",
@@ -46,7 +47,7 @@ const useStyles = makeStyles(theme => ({
 const HashtagCard = props => {
   const classes = useStyles();
 
-  const [state, updateState] = useState(20);
+  const [state, updateState] = useState(10);
 
   const showAll = event => {
     updateState(100000);

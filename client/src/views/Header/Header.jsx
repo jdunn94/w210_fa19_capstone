@@ -57,12 +57,12 @@ const Header = props => {
   };
 
   const handleChangeTopic = (event, value) => {
-    updateTopic(value)
-  }
+    updateTopic(value);
+  };
 
   const handleChangeLocation = (event, value) => {
-    updateLocation(value)
-  }
+    updateLocation(value);
+  };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -77,82 +77,108 @@ const Header = props => {
 
   const handleSearch = () => {
     props.history.push(`/results/${location}/${topic}`);
-  }
+  };
 
   return (
     <AppBar position="static">
       <Toolbar>
-        <IconButton
-          edge="start"
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="menu"
-          onClick={handleClick}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Menu
-          id="long-menu"
-          anchorEl={anchorEl}
-          getContentAnchorEl={null}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center"
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center"
-          }}
-          keepMounted
-          open={open}
-          onClose={handleClose}
-          PaperProps={{
-            style: {
-              maxHeight: ITEM_HEIGHT * 4.5,
-              width: 200
-            }
-          }}
-        >
-          <MenuItem onClick={handleClose}>About</MenuItem>
-          <MenuItem onClick={handleClose}>The Technology</MenuItem>
-        </Menu>
-        <Typography variant="h6" className={classes.title}>
-          Mic-Check.AI
-        </Typography>
-        <Grid container alignItems="center" className={classes.selectors}>
-          <Autocomplete
-            id="combo-box-demo"
-            options={topics}
-            getOptionLabel={option => option}
-            style={{ width: 200 }}
-            onChange={handleChangeTopic}
-            value={topic}
-            renderInput={params => (
-              <TextField {...params} fullWidth helperText="Topic" />
-            )}
-          />
-          <Divider orientation="vertical" variant="middle" />
-          <Autocomplete
-            id="combo-box-demo"
-            options={locations}
-            getOptionLabel={option => option}
-            style={{ width: 300 }}
-            onChange={handleChangeLocation}
-            value={location}
-            renderInput={params => (
-              <TextField {...params} fullWidth helperText="Location" />
-            )}
-          />
-          <Fab
-            color="secondary"
-            aria-label="search"
-            className={classes.margin}
-            size="small"
-            disabled={!topic || !location}
-            onClick={handleSearch}
+        <Grid container>
+          <Grid container item md={3} alignItems="center">
+            <Grid item>
+              <IconButton
+                edge="start"
+                className={classes.menuButton}
+                color="inherit"
+                aria-label="menu"
+                onClick={handleClick}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="long-menu"
+                anchorEl={anchorEl}
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "center"
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "center"
+                }}
+                keepMounted
+                open={open}
+                onClose={handleClose}
+                PaperProps={{
+                  style: {
+                    maxHeight: ITEM_HEIGHT * 4.5,
+                    width: 200
+                  }
+                }}
+              >
+                <MenuItem onClick={handleClose}>About</MenuItem>
+                <MenuItem onClick={handleClose}>The Technology</MenuItem>
+              </Menu>
+            </Grid>
+            <Grid item>
+              <Typography variant="h6" className={classes.title}>
+                Mic-Check.AI
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid item md={4} />
+          <Grid
+            container
+            item
+            alignItems="center"
+            className={classes.selectors}
+            direction="row"
+            md={5}
+            justify="flex-end"
+
           >
-            <SearchIcon />
-          </Fab>
+            <Grid item>
+              <Autocomplete
+                id="combo-box-demo"
+                options={topics}
+                getOptionLabel={option => option}
+                style={{ width: 200 }}
+                onChange={handleChangeTopic}
+                value={topic}
+                renderInput={params => (
+                  <TextField {...params} fullWidth helperText="Topic" />
+                )}
+              />
+            </Grid>
+            <Grid item>
+              <Divider orientation="vertical" variant="middle" />
+            </Grid>
+            <Grid item>
+              <Autocomplete
+                id="combo-box-demo"
+                options={locations}
+                getOptionLabel={option => option}
+                style={{ width: 300 }}
+                onChange={handleChangeLocation}
+                value={location}
+                renderInput={params => (
+                  <TextField {...params} fullWidth helperText="Location" />
+                )}
+              />
+            </Grid>
+            <Grid item>
+              <Fab
+                color="secondary"
+                aria-label="search"
+                className={classes.margin}
+                size="small"
+                disabled={!topic || !location}
+                onClick={handleSearch}
+              >
+                <SearchIcon />
+              </Fab>
+            </Grid>
+          </Grid>
         </Grid>
       </Toolbar>
     </AppBar>

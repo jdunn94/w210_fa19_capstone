@@ -6,7 +6,7 @@ import { Neo4jContext } from "../../services";
 import PropTypes from "prop-types";
 import { Skeleton } from "@material-ui/lab";
 
-import { Typography, ButtonGroup, Button } from "@material-ui/core";
+import { Typography, ButtonGroup, Button, Grid } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 
@@ -69,12 +69,20 @@ const BlockContainer = props => {
 
   if (isLoading) {
     return (
-      <div className={classes.results}>
-        <Skeleton variant="text" className={classes.header} />
-        <Skeleton variant="rect" className={classes.resultCard} />
-        <Skeleton variant="rect" className={classes.resultCard} />
-        <Skeleton variant="rect" className={classes.resultCard} />
-      </div>
+      <Grid container item className={classes.results}>
+        <Grid item>
+          <Skeleton variant="text" className={classes.header} />
+        </Grid>
+        <Grid item>
+          <Skeleton variant="rect" className={classes.resultCard} />
+        </Grid>
+        <Grid item>
+          <Skeleton variant="rect" className={classes.resultCard} />
+        </Grid>
+        <Grid item>
+          <Skeleton variant="rect" className={classes.resultCard} />
+        </Grid>
+      </Grid>
     );
   }
 
@@ -86,11 +94,11 @@ const BlockContainer = props => {
   let header = null;
   if (props.title && props.multiple) {
     header = (
-      <div className={classes.header}>
+      <Grid container item justify="space-between" alignItems="baseline">
         <Typography>
           {props.title}: {items.length} found
         </Typography>
-        <div className={classes.pageNav}>
+        <Grid item className={classes.pageNav}>
           <Typography>
             Page {displayPage + 1} / {Math.ceil(items.length / props.pageSize)}
           </Typography>
@@ -114,47 +122,58 @@ const BlockContainer = props => {
               <NavigateNextIcon />
             </Button>
           </ButtonGroup>
-        </div>
-      </div>
+        </Grid>
+      </Grid>
     );
   } else if (props.title) {
     header = (
-      <div className={classes.header}>
+      <Grid item className={classes.header}>
         <Typography>{props.title}</Typography>
-      </div>
+      </Grid>
     );
   }
 
   let children;
   if (props.noFlatten) {
     children = (
-      <div
-        className={classes.resultCard}
-        style={{ minHeight: props.cardHeight }}
-      >
+      <Grid item>
         {React.cloneElement(props.children, {
           data: itemsPage
         })}
-      </div>
+      </Grid>
     );
   } else {
-    children = itemsPage.map((item, i) => (
-      <div
-        key={i}
-        className={classes.resultCard}
-        style={{ minHeight: props.cardHeight }}
+    children = (
+      <Grid
+        container
+        item
+        spacing={2}
+        justify="flex-start"
+        alignItems="flex-start"
+        direction="column"
       >
-        {React.cloneElement(props.children, {
-          data: item
-        })}
-      </div>
-    ));
+        {itemsPage.map((item, i) => (
+          <Grid item key={i}>
+            {React.cloneElement(props.children, {
+              data: item
+            })}
+          </Grid>
+        ))}
+      </Grid>
+    );
   }
   return (
-    <div>
+    <Grid
+      container
+      item
+      spacing={1}
+      justify="flex-start"
+      alignItems="flex-start"
+      direction="column"
+    >
       {header}
-      <div className={classes.results}>{children}</div>
-    </div>
+      {children}
+    </Grid>
   );
 };
 

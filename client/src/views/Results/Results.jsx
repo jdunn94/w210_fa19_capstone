@@ -12,10 +12,7 @@ import {
 
 const useStyles = makeStyles(theme => ({
   page: {
-    display: "flex",
-    "flex-grow": 1,
-    position: "relative",
-    flexDirection: "column"
+    margin: theme.spacing(1)
   },
   searchBox: {
     zIndex: 100,
@@ -100,27 +97,29 @@ const Results = props => {
   console.log(userQuery);
 
   const hashtagQuery = `
-  MATCH (:Topic {name: "${props.match.params.topic}"})-[:GENERATED]->(t:Tweet)<-[:POPULAR_TWEETED]-(u:User)-[:COMMON_HASHTAG]->(h:Hashtag)
+  MATCH (:Topic ${topicClause})-[:GENERATED]->(t:Tweet)<-[:POPULAR_TWEETED]-(u:User)-[:COMMON_HASHTAG]->(h:Hashtag)
   RETURN h, h.name, h.topical_count ORDER BY h.topical_count DESC
   `;
 
   return (
-    <Grid container>
-      <Grid container item direction="row" style={{height:"200px"}}>
-        <Grid item xs={8}>
+    <Grid container className={classes.page} spacing={2}>
+      <Grid container item spacing={2}>
+        <Grid item sm={8}>
           <Typography className={classes.resultsHeader} variant="h2">
             Search results
           </Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid container item sm={4} zeroMinWidth>
           <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
             <HashtagCard />
           </BlockContainer>
         </Grid>
       </Grid>
-      <Divider variant="middle" />
-      <Grid container item direction="row">
-        <Grid item xs={8}>
+      <Grid item sm={12}>
+        <Divider variant="middle" />
+      </Grid>
+      <Grid container item spacing={2}>
+        <Grid container item sm={8}>
           <BlockContainer
             query={userQuery}
             cardHeight={"275px"}
@@ -137,7 +136,7 @@ const Results = props => {
             />
           </BlockContainer>
         </Grid>
-        <Grid item xs={4}>
+        <Grid container item sm={4}>
           <BlockContainer
             query={tweetQuery}
             cardHeight={"75px"}
