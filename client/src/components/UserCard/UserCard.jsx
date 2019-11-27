@@ -6,7 +6,6 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { grey } from "@material-ui/core/colors";
 import PropTypes from "prop-types";
 import logo from './logo.png';
 import heart from './heart.png';

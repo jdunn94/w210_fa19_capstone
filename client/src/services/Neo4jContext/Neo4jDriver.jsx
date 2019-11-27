@@ -9,7 +9,7 @@ const Neo4jDriver = props => {
     //"bolt://34.70.225.97",
 
     // pro
-    "bolt://mcai.dataerrant.com",
+    "bolt://mcai2.dataerrant.com",
 
     neo4j.auth.basic("guest", "guest"),
     {

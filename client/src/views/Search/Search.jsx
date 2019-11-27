@@ -35,7 +35,6 @@ const Search = props => {
     props.history.push(`/results/${where}/${what}`);
   };
 
-  console.log(props.match.params.explore);
   return (
     <div className={classes.searchPage}>
       {!props.match.params.explore && (

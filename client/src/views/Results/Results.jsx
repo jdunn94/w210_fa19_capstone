@@ -1,9 +1,8 @@
 import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Divider } from "@material-ui/core";
+import { Typography, Divider, Grid } from "@material-ui/core";
 
-import { SearchBox } from "../../components";
 import {
   BlockContainer,
   UserCard,
@@ -14,7 +13,6 @@ import {
 const useStyles = makeStyles(theme => ({
   page: {
     display: "flex",
-    "align-items": "center",
     "flex-grow": 1,
     position: "relative",
     flexDirection: "column"
@@ -31,7 +29,8 @@ const useStyles = makeStyles(theme => ({
     paddingTop: "25px"
   },
   resultsHeader: {
-    textAlign: "center"
+    marginTop: theme.spacing(2),
+    marginLeft: theme.spacing(2)
   },
   hashtagResults: {
     margin: theme.spacing(0),
@@ -51,100 +50,151 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column"
   },
-  tweetResults: {
-  }
+  tweetResults: {}
 }));
 
 const Results = props => {
   const classes = useStyles();
 
-  const handleExplore = event => {
-    props.history.push(`/explore`);
-  };
+  const locationsClause =
+    props.match.params.location === "All"
+      ? "*"
+      : props.match.params.location
+          .split(", ")[0]
+          .split("-")
+          .map(
+            a =>
+              `"${a
+                .split(" ")
+                .map(b => b + "~")
+                .join(" ")}"`
+          )
+          .join(" OR ");
 
-  const handleSearch = (what, where) => {
-    props.history.push(`/results/${where}/${what}`);
-  };
+  const topicClause =
+    props.match.params.topic === "All"
+      ? ""
+      : `{name: "${props.match.params.topic}"}`;
+
+  const userMatchClause =
+    props.match.params.location === "All"
+      ? "match (u:User)"
+      : `CALL db.index.fulltext.queryNodes("userLocation", '${locationsClause}') yield node as u, score where score > 1`;
 
   const tweetQuery = `
-  match (u:User {leader:true})-[:POPULAR_TWEETED]->(t:Tweet)
-  where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
-  and u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0 
+  ${userMatchClause}
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[]-(o:Topic ${topicClause})
   return u as users, t as tweets
-  order by t.retweet_count + t.favorite_count desc, t.created_at_date desc
+  ORDER BY t.favorite_count + t.retweet_count DESC, u.followers_count + u.friend_count
 `;
 
   const userQuery = `
-  match (u:User {leader:true})-[r:POPULAR_TWEETED]->(t:Tweet)
-  where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
-  and u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0 
-  with u, t
-  order by t.retweet_count + t.favorite_count desc, t.created_at_date desc
-  return u as users, count(t) as popular_tweets, collect(t)[..3] as tweets
-  order by count(t) desc
+  ${userMatchClause}
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[]-(o:Topic ${topicClause})
+  WITH u,t
+  order by t.favorite_count + t.retweet_count DESC
+  return u as users, collect(t) as tweets
+  ORDER BY u.followers_count + u.friend_count
   `;
 
+  console.log(userQuery);
+
   const hashtagQuery = `
-MATCH (u:User)-[:COMMON_HASHTAG]->(h:Hashtag)
-WHERE u.leader=TRUE AND u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0
-return h
-order by h.topical_count desc, h.name desc
+  MATCH (:Topic {name: "${props.match.params.topic}"})-[:GENERATED]->(t:Tweet)<-[:POPULAR_TWEETED]-(u:User)-[:COMMON_HASHTAG]->(h:Hashtag)
+  RETURN h, h.name, h.topical_count ORDER BY h.topical_count DESC
   `;
 
   return (
-    <div className={classes.page}>
-      <div className={classes.searchBox}>
-        <SearchBox
-          handleExplore={handleExplore}
-          handleSearch={handleSearch}
-          whatValue={props.match.params.topic}
-          whereValue={props.match.params.location}
-        />
-      </div>
-      <div className={classes.resultsSection}>
-        <Typography className={classes.resultsHeader} variant="h5">
-          Search results
-        </Typography>
-        <Divider variant="middle" />
-        <div className={classes.resultsColumns}>
-          <div className={classes.userResults}>
-            <BlockContainer
-              query={userQuery}
-              cardHeight={"275px"}
-              title={"User Community"}
-              multiple
-            >
-              <UserCard
-                history={props.history}
-                location={props.match.params.location}
-                topic={props.match.params.topic}
-                topicSpecific
-                profileLink
-              />
+    <Grid container>
+      <Grid container item direction="row" style={{height:"200px"}}>
+        <Grid item xs={8}>
+          <Typography className={classes.resultsHeader} variant="h2">
+            Search results
+          </Typography>
+        </Grid>
+        <Grid item xs={4}>
+          <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
+            <HashtagCard />
+          </BlockContainer>
+        </Grid>
+      </Grid>
+      <Divider variant="middle" />
+      <Grid container item direction="row">
+        <Grid item xs={8}>
+          <BlockContainer
+            query={userQuery}
+            cardHeight={"275px"}
+            title={"User Community"}
+            multiple
+            pageSize={5}
+          >
+            <UserCard
+              history={props.history}
+              location={props.match.params.location}
+              topic={props.match.params.topic}
+              topicSpecific
+              profileLink
+            />
+          </BlockContainer>
+        </Grid>
+        <Grid item xs={4}>
+          <BlockContainer
+            query={tweetQuery}
+            cardHeight={"75px"}
+            title={"Popular Tweets"}
+            pageSize={5}
+            multiple
+          >
+            <TweetCard expanded={false} history={props.history} />
+          </BlockContainer>
+        </Grid>
+      </Grid>
+    </Grid>
+  );
+  /*     <div className={classes.page}>
+      <Typography className={classes.resultsHeader} variant="h2">
+        Search results
+      </Typography>
+      <Divider variant="middle" />
+      <div className={classes.resultsColumns}>
+        <div className={classes.userResults}>
+          <BlockContainer
+            query={userQuery}
+            cardHeight={"275px"}
+            title={"User Community"}
+            multiple
+            pageSize={5}
+          >
+            <UserCard
+              history={props.history}
+              location={props.match.params.location}
+              topic={props.match.params.topic}
+              topicSpecific
+              profileLink
+            />
+          </BlockContainer>
+        </div>
+        <div className={classes.rightColumn}>
+          <div className={classes.hashtagResults}>
+            <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
+              <HashtagCard />
             </BlockContainer>
           </div>
-          <div className={classes.rightColumn}>
-            <div className={classes.hashtagResults}>
-              <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
-                <HashtagCard />
-              </BlockContainer>
-            </div>
-            <div className={classes.tweetResults}>
-              <BlockContainer
-                query={tweetQuery}
-                cardHeight={"75px"}
-                title={"Popular Tweets"}
-                pageSize={10}
-                multiple
-              >
-                <TweetCard expanded={false} history={props.history} />
-              </BlockContainer>
-            </div>
+          <div className={classes.tweetResults}>
+            <BlockContainer
+              query={tweetQuery}
+              cardHeight={"75px"}
+              title={"Popular Tweets"}
+              pageSize={5}
+              multiple
+            >
+              <TweetCard expanded={false} history={props.history} />
+            </BlockContainer>
           </div>
         </div>
       </div>
     </div>
-  );
+ */
 };
 
 export default Results;

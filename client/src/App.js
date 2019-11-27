@@ -1,8 +1,9 @@
 import React from "react";
 import "./App.css";
-import { Search, About, Results, User, Hashtag, Tweet } from "./views";
-import Button from "@material-ui/core/Button";
+import { Search, About, Results, User, Hashtag, Tweet, Header } from "./views";
+import { Button } from "@material-ui/core";
 import { Neo4jDriver } from "./services";
+import { withLayout } from "./withLayout";
 
 import {
   BrowserRouter as Router,
@@ -20,29 +21,17 @@ function App() {
     <div className="App">
       <Neo4jDriver>
         <Router>
-          <div className="App-header">
-            <Button color="secondary" component={Link} to="/">
-              Home
-            </Button>
-            <Button color="secondary" component={Link} to="/about">
-              About
-            </Button>
-          </div>
-          {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
-          <div className="App-main">
-            <Switch>
-              <Route path="/about" component={About} />
-              <Route
-                path="/results/:location/:topic/:id?"
-                component={Results}
-              />
-              <Route path="/user/:name/:topic/:location" component={User} />
-              <Route path="/hashtag/:name/:topic/:location" component={Hashtag} />
-              <Route path="/tweet/:id/" component={Tweet} />
-              <Route path="/:explore?" component={Search} />
-            </Switch>
-          </div>
+          <Switch>
+            <Route path="/about" component={withLayout(About)} />
+            <Route path="/results/:location/:topic/:id?" component={withLayout(Results)} />
+            <Route
+              path="/user/:name/:topic/:location"
+              component={withLayout(User)}
+            />
+            <Route path="/hashtag/:name/:topic/:location" component={withLayout(Hashtag)} />
+            <Route path="/tweet/:id/" component={withLayout(Tweet)} />
+            <Route path="/:explore?" component={withLayout(Search)} />
+          </Switch>
         </Router>
       </Neo4jDriver>
     </div>

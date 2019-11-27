@@ -27,7 +27,8 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "0px 20px 0px 20px"
+    padding: "0px 20px 0px 20px",
+    height: "32px"
   },
   pageNav: {
     display: "flex",
@@ -69,6 +70,7 @@ const BlockContainer = props => {
   if (isLoading) {
     return (
       <div className={classes.results}>
+        <Skeleton variant="text" className={classes.header} />
         <Skeleton variant="rect" className={classes.resultCard} />
         <Skeleton variant="rect" className={classes.resultCard} />
         <Skeleton variant="rect" className={classes.resultCard} />
