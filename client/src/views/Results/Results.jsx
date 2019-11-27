@@ -54,7 +54,7 @@ const Results = props => {
   const classes = useStyles();
 
   const locationsClause =
-    props.match.params.location === "All"
+    props.match.params.location === "All Locations"
       ? "*"
       : props.match.params.location
           .split(", ")[0]
@@ -69,12 +69,12 @@ const Results = props => {
           .join(" OR ");
 
   const topicClause =
-    props.match.params.topic === "All"
+    props.match.params.topic === "All Topics"
       ? ""
       : `{name: "${props.match.params.topic}"}`;
 
   const userMatchClause =
-    props.match.params.location === "All"
+    props.match.params.location === "All Locations"
       ? "match (u:User)"
       : `CALL db.index.fulltext.queryNodes("userLocation", '${locationsClause}') yield node as u, score where score > 1`;
 
@@ -129,8 +129,6 @@ const Results = props => {
           >
             <UserCard
               history={props.history}
-              location={props.match.params.location}
-              topic={props.match.params.topic}
               topicSpecific
               profileLink
             />

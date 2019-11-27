@@ -79,9 +79,7 @@ const UserCard = props => {
 
   const handleClick = event => {
     props.history.push(
-      `/user/${props.data.get("users").properties.screen_name}/${props.topic}/${
-        props.location
-      }`
+      `/user/${props.data.get("users").properties.screen_name}`
     );
   };
 
@@ -97,7 +95,7 @@ const UserCard = props => {
       <div className={classes.quotedTweet} key={tweet.properties.id}>
         <Typography gutterBottom>
           <b>
-            {created} | RT: {retweets} | F: {favorites}{" "}
+            {created} | RT: {retweets} | F: {favorites}
           </b>
           {text}
         </Typography>
@@ -126,7 +124,7 @@ const UserCard = props => {
   );
 
   // tweets
-  const userTweets = (
+  const userTweets = !props.topicSpecific ? null : (
     <div>
       <br />
       <Typography variant="subtitle2">Popular tweets:</Typography>
@@ -146,39 +144,39 @@ const UserCard = props => {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <Typography>
           <table width="100%" className={classes.table}>
-            <tr className={classes.th}>
-              <td rowspan="2" className={classes.th}>
-                <img src={person} alt="Person" className={classes.icon} />
-              </td>
-              <td className={classes.entryTitle} className={classes.th}>
-                <Link
-                  href={
-                    "https://twitter.com/" +
-                    props.data.get("users").properties.screen_name
-                  }
-                  target="_blank"
-                  rel="noopener"
-                  color="inherit"
-                  variant="h6"
-                  gutterBottom
-                  activeStyle={{ color: "#00acee" }}
-                >
-                  {props.data.get("users").properties.name}
-                </Link>
-              </td>
-              <td width="70%" rowspan="2" className={classes.th}>
-                <img src={logo} alt="Logo" align="right" />
-              </td>
-            </tr>
-            <tr className={classes.th}>
-              <td className={classes.entrySubtitle} border="0">
-                @{props.data.get("users").properties.screen_name}
-              </td>
-            </tr>
+            <tbody>
+              <tr className={classes.th}>
+                <td rowSpan="2" className={classes.th}>
+                  <img src={person} alt="Person" className={classes.icon} />
+                </td>
+                <td className={classes.entryTitle} className={classes.th}>
+                  <Link
+                    href={
+                      "https://twitter.com/" +
+                      props.data.get("users").properties.screen_name
+                    }
+                    target="_blank"
+                    rel="noopener"
+                    color="inherit"
+                    variant="h6"
+                    gutterBottom
+                    activeStyle={{ color: "#00acee" }}
+                  >
+                    {props.data.get("users").properties.name}
+                  </Link>
+                </td>
+                <td width="70%" rowSpan="2" className={classes.th}>
+                  <img src={logo} alt="Logo" align="right" />
+                </td>
+              </tr>
+              <tr className={classes.th}>
+                <td className={classes.entrySubtitle} border="0">
+                  @{props.data.get("users").properties.screen_name}
+                </td>
+              </tr>
+            </tbody>
           </table>
-        </Typography>
         <Typography
           variant="body2"
           component="p"
@@ -202,8 +200,6 @@ UserCard.propTypes = {
   topicSpecific: PropTypes.bool,
   profileLink: PropTypes.bool,
   data: PropTypes.object,
-  topic: PropTypes.string,
-  location: PropTypes.string,
   history: PropTypes.object,
   withLocation: PropTypes.bool
 };

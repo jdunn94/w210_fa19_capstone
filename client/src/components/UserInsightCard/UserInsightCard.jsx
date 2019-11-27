@@ -53,7 +53,7 @@ const UserInsightCard = props => {
         <Typography gutterBottom>
           <b>
             {created} | RT: {retweets} | F: {favorites}{" "}
-          </b>{" "}
+          </b>
           {text}
         </Typography>
       </div>
@@ -90,7 +90,7 @@ const UserInsightCard = props => {
     <Card className={classes.card}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          {`{${props.topic}} for @${userProps.screen_name}`}
+          {`{${props.data.get("topics").properties.name}} for @${userProps.screen_name}`}
         </Typography>
         <Typography variant="body2" component="p" gutterBottom>
           Role: Community Leader
@@ -107,9 +107,7 @@ const UserInsightCard = props => {
 };
 
 UserInsightCard.propTypes = {
-  data: PropTypes.object,
-  topic: PropTypes.string,
-  location: PropTypes.string
+  data: PropTypes.object
 };
 
 export default UserInsightCard;

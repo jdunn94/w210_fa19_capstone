@@ -3,7 +3,13 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
 
-import { BlockContainer, UserCard, TweetCard, ScrollToTopOnMount, UserInsightCard } from "../../components";
+import {
+  BlockContainer,
+  UserCard,
+  TweetCard,
+  ScrollToTopOnMount,
+  UserInsightCard
+} from "../../components";
 
 const useStyles = makeStyles(theme => ({
   page: {
@@ -48,21 +54,27 @@ const User = props => {
   const classes = useStyles();
 
   const tweetQuery = `
-  match (u:User {screen_name: "${props.match.params.name}"})-[:POPULAR_TWEETED]->(t:Tweet)
+  match (u:User {screen_name: "${props.match.params.name}"})-[:POPULAR_TWEETED]->(t:Tweet)<-[]-(o:Topic)
   where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
-  and u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0 
-  with u, t
+  AND u.topical_volume > 0 
+  with u, t, o
   order by u.followers_count desc, t.retweet_count + t.favorite_count desc, t.created_at_date desc
-  return u as users, t as tweets
+  return u as users, o as topics, t as tweets
 `;
 
   const userQuery = `
-  match (u:User {screen_name: "${props.match.params.name}"})-[:POPULAR_TWEETED]->(t:Tweet)
-  where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
-  and u.location CONTAINS 'San Francisco' AND NOT(u.location CONTAINS 'Not') AND u.topical_volume > 0 
-  with u, t
-  order by u.followers_count desc, t.retweet_count + t.favorite_count desc, t.created_at_date desc
-  return u as users, collect(t)[..3] as tweets
+  match (u:User {screen_name: "${props.match.params.name}"})
+  with u
+  return u as users
+`;
+
+  const userInsightQuery = `
+match (u:User {screen_name: "${props.match.params.name}"})-[:POPULAR_TWEETED]->(t:Tweet)<-[]-(o:Topic)
+where t.created_at_date is not null and t.retweet_count is not null and t.favorite_count is not null
+AND u.topical_volume > 0 
+with u, t, o
+order by u.followers_count desc, t.retweet_count + t.favorite_count desc, t.created_at_date desc
+return u as users, o as topics, collect(t)[..3] as tweets
 `;
 
   return (
@@ -77,15 +89,12 @@ const User = props => {
             <UserCard
               history={props.history}
               topic={props.match.params.topic}
-              location={props.match.params.location} 
-              withLocation     
+              location={props.match.params.location}
+              withLocation
             />
           </BlockContainer>
-          <BlockContainer query={userQuery} cardHeight={"275px"}>
-            <UserInsightCard
-              topic={props.match.params.topic}
-              location={props.match.params.location}             
-            />
+          <BlockContainer query={userInsightQuery} cardHeight={"275px"}>
+            <UserInsightCard />
           </BlockContainer>
         </div>
         <div className={classes.tweetResults}>

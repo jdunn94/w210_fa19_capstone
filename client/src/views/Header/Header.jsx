@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     width: "fit-content",
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: indigo[300],
+    backgroundColor: "#cddaff",
     color: theme.palette.text.secondary,
     "& svg": {
       margin: theme.spacing(2)

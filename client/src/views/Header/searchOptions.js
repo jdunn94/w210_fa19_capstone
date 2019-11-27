@@ -1,5 +1,5 @@
 export const locations = [
-  "All",
+  "All Locations",
   "New York-Newark-Jersey City, NY-NJ-PA MSA",
   "Los Angeles-Long Beach-Anaheim, CA MSA",
   "Chicago-Naperville-Elgin, IL-IN-WI MSA",
@@ -53,7 +53,7 @@ export const locations = [
 ];
 
 export const topics = [
-  "All",
+  "All Topics",
   "abortion",
   "affordable housing",
   "animal rights",

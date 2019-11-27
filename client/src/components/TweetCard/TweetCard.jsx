@@ -91,10 +91,10 @@ const TweetCard = props => {
   return (
     <Card className={classes.card}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          <table width="100%" className={classes.table}>
+        <table width="100%" className={classes.table}>
+          <tbody>
             <tr className={classes.th}>
-              <td className={classes.th} rowspan="2">
+              <td className={classes.th} rowSpan="2">
                 <img src={person} alt="Person" className={classes.icon} />
               </td>
               <td className={classes.th}>
@@ -115,40 +115,42 @@ const TweetCard = props => {
                   {props.data.get("users").properties.name}
                 </Link>
               </td>
-              <td width="60%" className={classes.th} rowspan="2">
+              <td width="60%" className={classes.th} rowSpan="2">
                 <img src={logo} alt="Logo" align="right" />
               </td>
             </tr>
-            <tr lassName={classes.th}>
+            <tr className={classes.th}>
               <td className={classes.entrySubtitle}>
                 @{props.data.get("users").properties.screen_name}
               </td>
             </tr>
-          </table>
-        </Typography>
+          </tbody>
+        </table>
         <Typography className={classes.quotedTweet} gutterBottom>
           {props.data.get("tweets").properties.text}
         </Typography>
         <div>
-          <Typography variant="body2" component="p">
-            <p className={classes.entrySubtitle}>
-              <img src={heart} alt="Heart" /> Favorites:{" "}
-              {!!props.data.get("tweets").properties.favorite_count
-                ? props.data.get("tweets").properties.favorite_count.toString()
-                : "n/a"}
-              | Retweets:{" "}
-              {!!props.data.get("tweets").properties.retweet_count
-                ? props.data.get("tweets").properties.retweet_count.toString()
-                : "n/a"}{" "}
-              |{" "}
-              {new Date(
+          <Typography
+            variant="body2"
+            component="p"
+            className={classes.entrySubtitle}
+          >
+            <img src={heart} alt="Heart" /> Favorites:{" "}
+            {!!props.data.get("tweets").properties.favorite_count
+              ? props.data.get("tweets").properties.favorite_count.toString()
+              : "n/a"}
+            | Retweets:{" "}
+            {!!props.data.get("tweets").properties.retweet_count
+              ? props.data.get("tweets").properties.retweet_count.toString()
+              : "n/a"}{" "}
+            |{" "}
+            {new Date(
+              props.data.get("tweets").properties.created_at_date.toString()
+            ).toLocaleDateString() +
+              " " +
+              new Date(
                 props.data.get("tweets").properties.created_at_date.toString()
-              ).toLocaleDateString() +
-                " " +
-                new Date(
-                  props.data.get("tweets").properties.created_at_date.toString()
-                ).toLocaleTimeString() || "n/a creation"}
-            </p>
+              ).toLocaleTimeString() || "n/a creation"}
           </Typography>
         </div>
       </CardContent>

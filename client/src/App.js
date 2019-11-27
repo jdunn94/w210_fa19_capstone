@@ -18,7 +18,7 @@ function App() {
               component={withLayout(Results)}
             />
             <Route
-              path="/user/:name/:topic/:location"
+              path="/user/:name"
               component={withLayout(User)}
             />
             <Route
