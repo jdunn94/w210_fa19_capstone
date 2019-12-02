@@ -24,3 +24,7 @@
   min-height: 92vh;
   display: flex;
 }
+
+.App {
+  height: 100%;
+}

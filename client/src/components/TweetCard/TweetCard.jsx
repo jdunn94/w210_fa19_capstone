@@ -135,10 +135,11 @@ const TweetCard = props => {
             component="p"
             className={classes.entrySubtitle}
           >
-            <img src={heart} alt="Heart" /> Favorites:{" "}
+            <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
+            Favorites:{" "}
             {!!props.data.get("tweets").properties.favorite_count
               ? props.data.get("tweets").properties.favorite_count.toString()
-              : "n/a"}
+              : "n/a"}{" "}
             | Retweets:{" "}
             {!!props.data.get("tweets").properties.retweet_count
               ? props.data.get("tweets").properties.retweet_count.toString()
@@ -154,12 +155,6 @@ const TweetCard = props => {
           </Typography>
         </div>
       </CardContent>
-      <CardActions>
-        <img src={tweet} alt="Tweet" align="left" />
-        <Button size="small" onClick={handleClick}>
-          View Insights
-        </Button>
-      </CardActions>
     </Card>
   );
 };

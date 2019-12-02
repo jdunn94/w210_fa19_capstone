@@ -1,52 +1,25 @@
 import React from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Typography, Grid } from "@material-ui/core";
 
 import {
   BlockContainer,
   UserCard,
-  TweetCard,
   ScrollToTopOnMount,
   UserInsightCard
 } from "../../components";
 
 const useStyles = makeStyles(theme => ({
   page: {
-    display: "flex",
-    "align-items": "center",
-    "flex-grow": 1,
-    position: "relative",
-    flexDirection: "column"
-  },
-  searchBox: {
-    zIndex: 100,
-    position: "sticky",
-    top: "10%",
-    paddingBottom: "50px"
-  },
-  resultsSection: {
-    width: "100%",
-    height: "100%",
-    paddingTop: "25px"
+    margin: theme.spacing(1)
   },
   resultsHeader: {
-    textAlign: "center"
+    textAlign: "left"
   },
   hashtagResults: {
     margin: theme.spacing(2),
     minHeight: "100px"
-  },
-  resultsColumns: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-evenly"
-  },
-  userResults: {
-    width: "60%"
-  },
-  tweetResults: {
-    width: "40%"
   }
 }));
 
@@ -78,37 +51,27 @@ return u as users, o as topics, collect(t)[..3] as tweets
 `;
 
   return (
-    <div className={classes.page}>
+    <Grid container item className={classes.page} alignItems="center" justify="center" direction="row">
       <ScrollToTopOnMount />
-      <Typography className={classes.resultsHeader} variant="h5">
-        User Info
-      </Typography>
-      <div className={classes.resultsColumns}>
-        <div className={classes.userResults}>
-          <BlockContainer query={userQuery} cardHeight={"50px"}>
-            <UserCard
-              history={props.history}
-              topic={props.match.params.topic}
-              location={props.match.params.location}
-              withLocation
-            />
-          </BlockContainer>
-          <BlockContainer query={userInsightQuery} cardHeight={"275px"}>
-            <UserInsightCard />
-          </BlockContainer>
-        </div>
-        <div className={classes.tweetResults}>
-          <BlockContainer
-            query={tweetQuery}
-            cardHeight={"75px"}
-            title={"Retweets"}
-            multiple
-          >
-            <TweetCard expanded={false} history={props.history} />
-          </BlockContainer>
-        </div>
-      </div>
-    </div>
+      <Grid item xs={12}>
+        <Typography className={classes.resultsHeader} variant="h2">
+          User Info
+        </Typography>
+      </Grid>
+      <Grid container item sm={8} alignItems="flex-start" justify="flex-start" direction="row" spacing={1}>
+        <BlockContainer query={userQuery} cardHeight={"50px"}>
+          <UserCard
+            history={props.history}
+            topic={props.match.params.topic}
+            location={props.match.params.location}
+            withLocation
+          />
+        </BlockContainer>
+        <BlockContainer query={userInsightQuery} cardHeight={"275px"}>
+          <UserInsightCard />
+        </BlockContainer>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -17,6 +17,7 @@ import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
 import SearchIcon from "@material-ui/icons/Search";
 import MenuIcon from "@material-ui/icons/Menu";
+import clsx from "clsx";
 
 const ITEM_HEIGHT = 48;
 
@@ -39,6 +40,22 @@ const useStyles = makeStyles(theme => ({
   },
   margin: {
     margin: theme.spacing(1)
+  },
+  toolbar: {
+    alignItems: "flex-start",
+    justifyContent: "center",
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(2)
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120
+  },
+  color: {
+    color: "white"
+  },
+  notchedOutline: {
+    borderColor: "white !important"
   }
 }));
 
@@ -75,15 +92,21 @@ const Header = props => {
     setAnchorEl(null);
   };
 
+  const navigatePage = event => {
+    setAnchorEl(null);
+    props.history.push("/" + event.target.id);
+  };
+
   const handleSearch = () => {
     props.history.push(`/results/${location}/${topic}`);
   };
 
+  const cName = { className: "MuiAutocomplete-inputRootDense" };
   return (
     <AppBar position="static">
-      <Toolbar>
+      <Toolbar className={classes.toolbar}>
         <Grid container>
-          <Grid container item md={3} alignItems="center">
+          <Grid container item md={2} alignItems="center">
             <Grid item>
               <IconButton
                 edge="start"
@@ -116,8 +139,15 @@ const Header = props => {
                   }
                 }}
               >
-                <MenuItem onClick={handleClose}>About</MenuItem>
-                <MenuItem onClick={handleClose}>The Technology</MenuItem>
+                <MenuItem id="home" onClick={navigatePage}>
+                  Home
+                </MenuItem>
+                <MenuItem id="explore" onClick={navigatePage}>
+                  Explore
+                </MenuItem>
+                <MenuItem id="technology" onClick={navigatePage}>
+                  Technology
+                </MenuItem>
               </Menu>
             </Grid>
             <Grid item>
@@ -126,27 +156,38 @@ const Header = props => {
               </Typography>
             </Grid>
           </Grid>
-          <Grid item md={4} />
-          <Grid
-            container
-            item
-            alignItems="center"
-            className={classes.selectors}
-            direction="row"
-            md={5}
-            justify="flex-end"
-
-          >
+          <Grid container item direction="row" md={10} justify="flex-end">
             <Grid item>
               <Autocomplete
                 id="combo-box-demo"
                 options={topics}
                 getOptionLabel={option => option}
-                style={{ width: 200 }}
+                style={{ width: 300, color: "white" }}
                 onChange={handleChangeTopic}
                 value={topic}
                 renderInput={params => (
-                  <TextField {...params} fullWidth helperText="Topic" />
+                  <TextField
+                    {...params}
+                    label="Topic"
+                    fullWidth
+                    variant="outlined"
+                    margin="dense"
+                    InputProps={{
+                      ...params.InputProps,
+                      className: clsx(
+                        "MuiAutocomplete-inputRootDense",
+                        classes.color
+                      ),
+                      classes: {
+                        notchedOutline: classes.notchedOutline
+                      }
+                    }}
+                    InputLabelProps={{
+                      classes: {
+                        root: classes.color
+                      }
+                    }}
+                  />
                 )}
               />
             </Grid>
@@ -158,11 +199,32 @@ const Header = props => {
                 id="combo-box-demo"
                 options={locations}
                 getOptionLabel={option => option}
-                style={{ width: 300 }}
+                style={{ width: 450 }}
                 onChange={handleChangeLocation}
                 value={location}
                 renderInput={params => (
-                  <TextField {...params} fullWidth helperText="Location" />
+                  <TextField
+                    {...params}
+                    label="Location"
+                    fullWidth
+                    variant="outlined"
+                    margin="dense"
+                    InputProps={{
+                      ...params.InputProps,
+                      className: clsx(
+                        "MuiAutocomplete-inputRootDense",
+                        classes.color
+                      ),
+                      classes: {
+                        notchedOutline: classes.notchedOutline
+                      }
+                    }}
+                    InputLabelProps={{
+                      classes: {
+                        root: classes.color
+                      }
+                    }}
+                  />
                 )}
               />
             </Grid>
@@ -175,7 +237,7 @@ const Header = props => {
                 disabled={!topic || !location}
                 onClick={handleSearch}
               >
-                <SearchIcon />
+                <SearchIcon fontSize="small" />
               </Fab>
             </Grid>
           </Grid>

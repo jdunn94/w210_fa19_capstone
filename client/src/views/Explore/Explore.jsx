@@ -1,8 +1,8 @@
 import React from "react";
 import "./search.css";
-
-import { makeStyles } from "@material-ui/core/styles";
-import { MapViewer, SearchBox } from "../../components";
+import { Helmet } from "react-helmet";
+import { makeStyles, Grid } from "@material-ui/core";
+import { MapViewer } from "../../components";
 
 const useStyles = makeStyles(theme => ({
   searchPage: {
@@ -20,11 +20,11 @@ const useStyles = makeStyles(theme => ({
   },
   searchBox: {
     zIndex: 100,
-    position: "relative",
+    position: "relative"
   }
 }));
 
-const Search = props => {
+const Explore = props => {
   const classes = useStyles();
 
   const handleExplore = event => {
@@ -36,20 +36,15 @@ const Search = props => {
   };
 
   return (
-    <div className={classes.searchPage}>
-      {!props.match.params.explore && (
-        <div className={classes.searchBox}>
-          <SearchBox
-            handleExplore={handleExplore}
-            handleSearch={handleSearch}
-          />
-        </div>
-      )}
+    <Grid item className={classes.searchPage}>
+      <Helmet>
+        <title>MC.AI - Explore</title>
+      </Helmet>
       <div className={classes.mapBackground}>
         <MapViewer hover={props.match.params.explore} />
       </div>
-    </div>
+    </Grid>
   );
 };
 
-export default Search;
+export default Explore;

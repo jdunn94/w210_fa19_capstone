@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./views/Header";
-import { makeStyles } from "@material-ui/core";
-import grey from '@material-ui/core/colors/grey';
+import { makeStyles, Grid } from "@material-ui/core";
+import grey from "@material-ui/core/colors/grey";
 
 const useStyles = makeStyles(theme => ({
   title: {
@@ -11,11 +11,13 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1)
   },
   body: {
-    minHeight: "92vh",
+    minHeight: "100vh",
     display: "flex"
   },
   root: {
-      backgroundColor: grey[300]
+    backgroundColor: grey[300],
+    minHeight: "100%",
+    width: "100vw"
   }
 }));
 
@@ -24,12 +26,14 @@ export const withLayout = WrappedComponent => {
     const classes = useStyles();
 
     return (
-      <div className={classes.root}>
-        <Header {...props}/>
-        <div className={classes.body}>
+      <Grid container className={classes.root} alignContent="flex-start">
+        <Grid item xs={12}>
+          <Header {...props} />
+        </Grid>
+        <Grid item container xs={12}>
           <WrappedComponent {...props} />
-        </div>
-      </div>
+        </Grid>
+      </Grid>
     );
   };
 };

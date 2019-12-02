@@ -13,7 +13,7 @@ import person from "./people.png";
 
 const useStyles = makeStyles({
   card: {
-    minWidth: 275
+    width: "100%"
   },
   bullet: {
     display: "inline-block",
@@ -96,7 +96,7 @@ const UserCard = props => {
         <Typography gutterBottom>
           <b>
             {created} | RT: {retweets} | F: {favorites}
-          </b>
+          </b>{" "}
           {text}
         </Typography>
       </div>

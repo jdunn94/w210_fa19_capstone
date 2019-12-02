@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Helmet } from "react-helmet";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from "@material-ui/core";
 
@@ -18,6 +18,9 @@ const Hashtag = props => {
 
   return (
     <div className={classes.page}>
+      <Helmet>
+        <title>MC.AI - Hashtag Info</title>
+      </Helmet>
       <Typography>Hashtag info for {props.match.params.name}...</Typography>
       <div
         style={{

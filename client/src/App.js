@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { Search, About, Results, User, Hashtag, Tweet } from "./views";
+import { AboutTechnology, Home, Explore, Results, User, Hashtag, Tweet } from "./views";
 import { Neo4jDriver } from "./services";
 import { withLayout } from "./withLayout";
 
@@ -12,7 +12,6 @@ function App() {
       <Neo4jDriver>
         <Router>
           <Switch>
-            <Route path="/about" component={withLayout(About)} />
             <Route
               path="/results/:location/:topic/:id?"
               component={withLayout(Results)}
@@ -26,7 +25,9 @@ function App() {
               component={withLayout(Hashtag)}
             />
             <Route path="/tweet/:id/" component={withLayout(Tweet)} />
-            <Route path="/:explore?" component={withLayout(Search)} />
+            <Route path="/explore" component={withLayout(Explore)} />
+            <Route path="/technology" component={withLayout(AboutTechnology)} />
+            <Route path="/" component={withLayout(Home)} />
           </Switch>
         </Router>
       </Neo4jDriver>

@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Helmet } from "react-helmet";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Divider, Grid } from "@material-ui/core";
 
@@ -12,42 +12,12 @@ import {
 
 const useStyles = makeStyles(theme => ({
   page: {
-    margin: theme.spacing(1)
-  },
-  searchBox: {
-    zIndex: 100,
-    position: "sticky",
-    top: "10%",
-    paddingBottom: "50px"
-  },
-  resultsSection: {
-    width: "100%",
-    height: "100%",
-    paddingTop: "25px"
+    margin: theme.spacing(1),
   },
   resultsHeader: {
     marginTop: theme.spacing(2),
     marginLeft: theme.spacing(2)
-  },
-  hashtagResults: {
-    margin: theme.spacing(0),
-    minHeight: "100px"
-  },
-  resultsColumns: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginTop: "10px"
-  },
-  userResults: {
-    width: "60%"
-  },
-  rightColumn: {
-    width: "40%",
-    display: "flex",
-    flexDirection: "column"
-  },
-  tweetResults: {}
+  }
 }));
 
 const Results = props => {
@@ -102,82 +72,47 @@ const Results = props => {
   `;
 
   return (
-    <Grid container className={classes.page} spacing={2}>
-      <Grid container item spacing={2}>
-        <Grid item sm={8}>
-          <Typography className={classes.resultsHeader} variant="h2">
-            Search results
-          </Typography>
-        </Grid>
-        <Grid container item sm={4} zeroMinWidth>
-          <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
-            <HashtagCard />
-          </BlockContainer>
-        </Grid>
-      </Grid>
-      <Grid item sm={12}>
-        <Divider variant="middle" />
-      </Grid>
-      <Grid container item spacing={2}>
-        <Grid container item sm={8}>
-          <BlockContainer
-            query={userQuery}
-            cardHeight={"275px"}
-            title={"User Community"}
-            multiple
-            pageSize={5}
-          >
-            <UserCard
-              history={props.history}
-              topicSpecific
-              profileLink
-            />
-          </BlockContainer>
-        </Grid>
-        <Grid container item sm={4}>
-          <BlockContainer
-            query={tweetQuery}
-            cardHeight={"75px"}
-            title={"Popular Tweets"}
-            pageSize={5}
-            multiple
-          >
-            <TweetCard expanded={false} history={props.history} />
-          </BlockContainer>
-        </Grid>
-      </Grid>
-    </Grid>
-  );
-  /*     <div className={classes.page}>
-      <Typography className={classes.resultsHeader} variant="h2">
-        Search results
-      </Typography>
-      <Divider variant="middle" />
-      <div className={classes.resultsColumns}>
-        <div className={classes.userResults}>
-          <BlockContainer
-            query={userQuery}
-            cardHeight={"275px"}
-            title={"User Community"}
-            multiple
-            pageSize={5}
-          >
-            <UserCard
-              history={props.history}
-              location={props.match.params.location}
-              topic={props.match.params.topic}
-              topicSpecific
-              profileLink
-            />
-          </BlockContainer>
-        </div>
-        <div className={classes.rightColumn}>
-          <div className={classes.hashtagResults}>
+    <React.Fragment>
+      <Helmet>
+        <title>MC.AI - Results</title>
+      </Helmet>
+      <Grid
+        container
+        className={classes.page}
+        direction="row"
+        xs={12}
+        justify="flex-start"
+        alignItems="flex-start"
+        spacing={2}
+      >
+        <Grid container item spacing={2} direction="row" justify="flex-start" alignItems="flex-start">
+          <Grid item sm={8}>
+            <Typography className={classes.resultsHeader} variant="h2">
+              Search results
+            </Typography>
+          </Grid>
+          <Grid container item sm={4} zeroMinWidth>
             <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
               <HashtagCard />
             </BlockContainer>
-          </div>
-          <div className={classes.tweetResults}>
+          </Grid>
+        </Grid>
+        <Grid item sm={12}>
+          <Divider variant="middle" />
+        </Grid>
+        <Grid container item spacing={1}>
+          <Grid container item sm={8} alignItems="flex-start">
+            <BlockContainer
+              query={userQuery}
+              cardHeight={"275px"}
+              title={"User Community"}
+              multiple
+              pageSize={5}
+            >
+              <UserCard history={props.history} topicSpecific profileLink />
+            </BlockContainer>
+          </Grid>
+          <Grid container item sm={4} alignItems="flex-start">
             <BlockContainer
               query={tweetQuery}
               cardHeight={"75px"}
@@ -187,11 +122,11 @@ const Results = props => {
             >
               <TweetCard expanded={false} history={props.history} />
             </BlockContainer>
-          </div>
-        </div>
-      </div>
-    </div>
- */
+          </Grid>
+        </Grid>
+      </Grid>
+    </React.Fragment>
+  );
 };
 
 export default Results;
