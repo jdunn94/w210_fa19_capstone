@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import PropTypes from "prop-types";
 import logo from "./logo.png";
+import happyface from "./happyface.png";
 import heart from "./heart.png";
 import person from "./people.png";
 import { decodeEntities, toTitleCase } from "../../utilities";
@@ -89,28 +90,31 @@ const UserCard = props => {
 
   const tweetToLine = tweet => {
     const created = new Date(
-      tweet.properties.created_at_date.toString()
-    ).toLocaleDateString();
+      tweet.properties.created_at_date.toString()).toLocaleDateString() + " " +
+		  new Date(
+			  tweet.properties.created_at_date.toString()).toLocaleTimeString();
     const text = tweet.properties.text;
     const retweets = tweet.properties.retweet_count.toString();
     const favorites = tweet.properties.favorite_count.toString();
 
     return (
-      <div className={classes.quotedTweet} key={tweet.properties.id}>
-        <Typography gutterBottom>
-          <b>
-            {created} | RT: {retweets} | F: {favorites}
-          </b>{" "}
+      <div key={tweet.properties.id}>
+        <Typography gutterBottom className={classes.quotedTweet}>
           {decodeEntities(text)}
         </Typography>
-      </div>
+	<Typography gutterBottom className={classes.entrySubtitle}>
+	    <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
+	    Favorites: {favorites} | Retweets: {retweets} | {created} 
+    	</Typography>
+     </div>
     );
   };
 
   // headline
-  let headline = `Followers: ${
-    props.data.get("users").properties.followers_count
-  } | Friends: ${props.data.get("users").properties.friend_count}`;
+  let headline = `${props.data.get("users").properties.followers_count} Followers | ${
+	  !!props.data.get("users").properties.friend_count 
+		  ? props.data.get("users").properties.friend_count.toString()  
+		  : "0"} Friends`;
 
   if (props.withLocation) {
     headline = `${props.data.get("users").properties.name} | ${
@@ -193,7 +197,7 @@ const UserCard = props => {
           component="p"
           className={classes.entrySubtitle}
         ></Typography>
-        {props.topicSpecific && userTweets}
+        {props.topicSpeciuserTweetsfic && userTweets}
         {props.topicSpecific && role}
         <Typography
           variant="body2"
@@ -202,17 +206,14 @@ const UserCard = props => {
         >
           <b>Description:</b> {decodeEntities(props.data.get("users").properties.description)}
         </Typography>
-        <div>
           <Typography
             variant="body2"
             component="p"
             className={classes.entrySubtitle}
           >
-            <br />
-            <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
-            {headline}
+	  <img src={happyface} alt="HappyFace" style={{ marginRight: "4px" }} /> 
+	  {headline}
           </Typography>
-        </div>
       </CardContent>
       {props.profileLink && linkToProfile}
     </Card>
