@@ -13,7 +13,7 @@ const Neo4jDriver = props => {
     //"bolt://localhost:7687",
     neo4j.auth.basic("guest", "guest"),
     {
-      encrypted: false
+      encrypted: true
     }
   );
 

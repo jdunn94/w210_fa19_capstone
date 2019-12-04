@@ -41,6 +41,9 @@ const useStyles = makeStyles({
   },
   keyValueText: {
     display: "flex"
+  },
+  cell: {
+    padding: "6px 24px 6px 16px"
   }
 });
 
@@ -51,7 +54,8 @@ const UserInsightCard = props => {
   const userProps = props.data.get("users").properties;
   const roleProps = props.data.get("role").properties;
   const topicProps = props.data.get("topic").properties;
-  const statProps = props.data.get("r2_stats");
+  const localStatProps = props.data.get("local_stats");
+  const allStatProps = props.data.get("all_stats");
   const hashtags = props.data.get("hashtags");
 
   const handleNavigateTopic = () => {
@@ -77,8 +81,6 @@ const UserInsightCard = props => {
       </div>
     );
   };
-  console.log(roleProps);
-  console.log(statProps);
   /*
   # User Insights Page
   Two versions of copy for each user insight that will tell the user what the recommendation is based on whether the 
@@ -107,54 +109,132 @@ const UserInsightCard = props => {
       <Table className={classes.table} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell style={{ width: "20%" }}>Dimension</TableCell>
-            <TableCell style={{ width: "20%" }} align="right">
+            <TableCell style={{ width: "10%" }} className={classes.cell}>
+              Dimension
+            </TableCell>
+            <TableCell
+              style={{ width: "20%" }}
+              className={classes.cell}
+              align="right"
+            >
               This User
             </TableCell>
-            <TableCell style={{ width: "20%" }} align="right">
-              All Users
+            <TableCell
+              style={{ width: "20%" }}
+              className={classes.cell}
+              align="right"
+            >
+              This Location
             </TableCell>
-            <TableCell align="left">Outcome</TableCell>
+            <TableCell
+              style={{ width: "20%" }}
+              className={classes.cell}
+              align="right"
+            >
+              All Locations
+            </TableCell>
+            <TableCell className={classes.cell} align="left">
+              Outcome
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell component="th" scope="row">
+            <TableCell className={classes.cell} component="th" scope="row">
               Topical Volume
             </TableCell>
-            <TableCell align="right">
+            <TableCell className={classes.cell} align="right">
               {(roleProps.topical_volume * 100).toFixed(2)}%
             </TableCell>
-            <TableCell align="right">
-              {(statProps.topical_volume * 100).toFixed(2)}%
+            <TableCell className={classes.cell} align="right">
+              mean:{" "}
+              {!!localStatProps.topical_volume
+                ? `${(localStatProps.topical_volume * 100).toFixed(2)}%`
+                : "n/a"}
             </TableCell>
-            <TableCell align="left">
-              {roleProps.topical_volume > 2 * statProps.topical_volume
-                ? "This is a high volume of tweets. This user may particularly be interested in this specific topic more so than others in this group."
-                : "This is an average or low volume of tweets. This user may occasionally tweet about this specific topic but may not be focused on this one issue."}
+            <TableCell className={classes.cell} align="right">
+              mean:{" "}
+              {!!allStatProps.topical_volume
+                ? `${(allStatProps.topical_volume * 100).toFixed(2)}%`
+                : "n/a"}
+            </TableCell>
+            <TableCell className={classes.cell} align="left">
+              {!localStatProps.topical_volume ||
+              roleProps.topical_volume > 2 * localStatProps.topical_volume ? (
+                <div>
+                  <Typography variant="p">This is a </Typography>
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    high volume of tweets
+                  </Typography>
+                  <Typography variant="p">
+                    . This user may particularly be interested in this specific
+                    topic more so than others in this group.
+                  </Typography>
+                </div>
+              ) : (
+                <div>
+                  <Typography variant="p">This is an </Typography>{" "}
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    average or low volume of tweets
+                  </Typography>
+                  <Typography variant="p">
+                    . This user may occasionally tweet about this specific topic
+                    but may not be focused on this one issue.
+                  </Typography>
+                </div>
+              )}
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell component="th" scope="row">
+            <TableCell className={classes.cell} component="th" scope="row">
               Topical Retweets
             </TableCell>
-            <TableCell align="right">
-              {(roleProps.topical_retweets * 100).toFixed(2)}%
+            <TableCell className={classes.cell} align="right">
+              {roleProps.topical_retweets.toString()}
             </TableCell>
-            <TableCell align="right">
-              {(statProps.topical_retweets * 100).toFixed(2)}%
+            <TableCell className={classes.cell} align="right">
+              mean:{" "}
+              {!!localStatProps.topical_retweets
+                ? localStatProps.topical_retweets.toFixed(0)
+                : "n/a"}
             </TableCell>
-            <TableCell align="left">
-              {roleProps.topical_retweets > 2 * statProps.topical_retweets
-                ? "This is a large amount of retweets. This user has considerable influence in their network."
-                : "This is a relatively small amount of retweets. This user may not have as much influence in their network as users in other networks."}
+            <TableCell className={classes.cell} align="right">
+              mean:{" "}
+              {!!allStatProps.topical_retweets
+                ? allStatProps.topical_retweets.toFixed(0)
+                : "n/a"}
+            </TableCell>
+            <TableCell className={classes.cell} align="left">
+              {!localStatProps.topical_retweets || roleProps.topical_retweets >
+              2 * localStatProps.topical_retweets ? (
+                <div>
+                  <Typography variant="p">This is a </Typography>
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    large amount of retweets
+                  </Typography>
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    . This user has considerable influence in their network.
+                  </Typography>
+                </div>
+              ) : (
+                <div>
+                  <Typography variant="p">This is a </Typography>
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    relatively small amount of retweets
+                  </Typography>
+                  <Typography variant="p">
+                    . This user may not have as much influence in their network
+                    as users in other networks.
+                  </Typography>
+                </div>
+              )}
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell component="th" scope="row">
+            <TableCell className={classes.cell} component="th" scope="row">
               Common hashtags
             </TableCell>
-            <TableCell align="right">
+            <TableCell className={classes.cell} align="right">
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {hashtags.map((a, i) => (
                   <Typography
@@ -164,17 +244,45 @@ const UserInsightCard = props => {
                 ))}
               </div>
             </TableCell>
-            <TableCell align="right">
+            <TableCell className={classes.cell} align="right">
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {statProps.hashtags.slice(1, 4).map((a, i) => (
+                {localStatProps.hashtags.slice(0, 4).map((a, i) => (
                   <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
                 ))}
               </div>
             </TableCell>
-            <TableCell align="left">
-              {hashtags.count > 2
-                ? "These are very common hashtags for this TOPIC LOCATION combination. This user may be aligned with a larger movement or these hashtags could be fairly generic."
-                : "These are very uncommon hashtags for this TOPIC LOCATION combination. This may be a unique hashtag and could be specific or could be nonsense."}
+            <TableCell className={classes.cell} align="right">
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {allStatProps.hashtags.slice(0, 4).map((a, i) => (
+                  <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
+                ))}
+              </div>
+            </TableCell>
+            <TableCell className={classes.cell} align="left">
+              {hashtags.count > 2 ? (
+                <div>
+                  <Typography variant="p">These are</Typography>
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    very common hashtags
+                  </Typography>
+                  <Typography variant="p">
+                    for this topic and location combination. This user may be
+                    aligned with a larger movement or these hashtags could be
+                    fairly generic.
+                  </Typography>
+                </div>
+              ) : (
+                <div>
+                  <Typography variant="p">These are </Typography>
+                  <Typography variant="p" style={{ fontWeight: "bold" }}>
+                    very uncommon hashtags{" "}
+                  </Typography>
+                  <Typography variant="p">
+                    for this topic and location combination. This may be a
+                    unique hashtag and could be specific or could be nonsense.
+                  </Typography>
+                </div>
+              )}
             </TableCell>
           </TableRow>
         </TableBody>
