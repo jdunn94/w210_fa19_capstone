@@ -66,7 +66,7 @@ const Results = props => {
   match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
   WITH u,r,t
   order by t.favorite_count + t.retweet_count DESC
-  return u as users, collect(t) as tweets, r as role
+  return u as users, collect(distinct t) as tweets, r as role
   ORDER BY u.followers_count + u.friend_count
   `;
 
@@ -74,10 +74,7 @@ const Results = props => {
   ${userMatchClause}
   MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
   WHERE r.topical_volume > 0 and r.persona = "thought_leader"
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
-  WITH u,r,t
-  order by t.favorite_count + t.retweet_count DESC
-  return u as users, collect(t) as tweets, r as role
+  return u as users
   ORDER BY u.followers_count + u.friend_count
   `;
 
@@ -85,10 +82,7 @@ const Results = props => {
   ${userMatchClause}
   MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
   WHERE r.topical_volume > 0 and r.persona = "content_creator"
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
-  WITH u,r,t
-  order by t.favorite_count + t.retweet_count DESC
-  return u as users, collect(t) as tweets, r as role
+  return u as users
   ORDER BY u.followers_count + u.friend_count
   `;
 
@@ -96,10 +90,7 @@ const Results = props => {
   ${userMatchClause}
   MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
   WHERE r.topical_volume > 0 and r.persona = "amplifier"
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
-  WITH u,r,t
-  order by t.favorite_count + t.retweet_count DESC
-  return u as users, collect(t) as tweets, r as role
+  return u as users
   ORDER BY u.followers_count + u.friend_count
   `;
 
@@ -107,10 +98,7 @@ const Results = props => {
   ${userMatchClause}
   MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
   WHERE r.topical_volume > 0 and r.persona = "watchdog"
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
-  WITH u,r,t
-  order by t.favorite_count + t.retweet_count DESC
-  return u as users, collect(t) as tweets, r as role
+  return u as users
   ORDER BY u.followers_count + u.friend_count
   `;
 
@@ -137,6 +125,7 @@ const Results = props => {
             query={thoughtLeaderQuery}
             cardHeight={"176px"}
             passThru
+            pageSize={0}
           >
             <LeaderBoard title={"Thought Leaders"} history={props.history} />
           </BlockContainer>
@@ -146,17 +135,28 @@ const Results = props => {
             query={contentCreatorQuery}
             cardHeight={"176px"}
             passThru
+            pageSize={0}
           >
             <LeaderBoard title={"Content Creators"} history={props.history} />
           </BlockContainer>
         </Grid>
         <Grid item sm={3} className={classes.leaderboard}>
-          <BlockContainer query={amplifierQuery} cardHeight={"176px"} passThru>
+          <BlockContainer
+            query={amplifierQuery}
+            cardHeight={"176px"}
+            passThru
+            pageSize={0}
+          >
             <LeaderBoard title={"Amplifiers"} history={props.history} />
           </BlockContainer>
         </Grid>
         <Grid item sm={3} className={classes.leaderboard}>
-          <BlockContainer query={watchdogQuery} cardHeight={"176px"} passThru>
+          <BlockContainer
+            query={watchdogQuery}
+            cardHeight={"176px"}
+            passThru
+            pageSize={0}
+          >
             <LeaderBoard title={"Watchdogs"} history={props.history} />
           </BlockContainer>
         </Grid>
