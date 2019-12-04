@@ -45,7 +45,7 @@ const LeaderBoard = props => {
 
   const dataList =
     props.data.length === 0 ? (
-      <Typography>No members in this community</Typography>
+      <Typography>No users in this role</Typography>
     ) : (
       <AutoSizer>
         {({ height, width }) => (

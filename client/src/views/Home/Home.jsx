@@ -13,8 +13,8 @@ const useStyles = makeStyles(theme => ({
   },
   paper: {
     width: "80%",
-    height: "80%",
-    padding: "10px"
+    padding: "10px",
+    marginTop: theme.spacing(2)
   },
   body: {
     "align-items": "left"
@@ -30,11 +30,17 @@ const Home = props => {
         <title>mic-check.ai</title>
       </Helmet>
       <Paper className={classes.paper}>
-        <Typography variant="h2" gutterBottom>
-          About Mic-Check.AI
+        <Typography
+          variant="h2"
+          style={{ textAlign: "center", color: "#0091ea" }}
+        >
+          mic-check.ai
+        </Typography>
+        <Typography variant="h6" style={{ textAlign: "center", color: "#607d8b" }} gutterBottom>
+          Connecting nonprofits to the communities they serve
         </Typography>
         <div className={classes.body}>
-          <Typography variant="h3" align="left" gutterBottom>
+          <Typography variant="h5" align="left" gutterBottom>
             The Mission
           </Typography>
           <Typography align="left">
@@ -54,26 +60,28 @@ const Home = props => {
             people who care about their causes.
           </Typography>
           <br />
-          <Typography variant="h3" align="left" gutterBottom>
+          <Typography variant="h5" align="left" gutterBottom>
             The Product
           </Typography>
           <Typography align="left">
-            mic-check.ai was developed to augment the research and design phase
-            of social good programs. By scouring Twitter for community approved
-            thought leaders, this application provides program managers with a
-            snapshot overview of how social issues are currently impacting
-            communities across the United States. mic-check.ai leverages machine
-            learning techniques, including sentiment and social network
-            analysis, to build user profiles across a variety of metropolitan
-            areas.
+            mic-check.ai leverages machine learning techniques to build user
+            profiles across a variety of major metropolitan areas with the goal
+            of augmenting the research and design phase of social good programs.
+            By compressing the Twitter graph into community-oriented user
+            networks, this application provides program managers with a snapshot
+            overview of how social issues are currently impacting communities
+            across the United States.
           </Typography>
           <br />
-          <Typography variant="h3" align="left" gutterBottom>
+          <Typography variant="h5" align="left" gutterBottom>
             The Team
           </Typography>
           <Typography align="left">
-            We are a group of UC Berkeley graduate students interested in the
-            intersection of social good and data science. Please hire us.
+            We are a group of UC Berkeley Masters of Information and Data
+            Science candidates interested in the intersection of social good and
+            data science. This four month capstone project has given us
+            experience in product management, data engineering, machine learning
+            at scale, and front-end development.
           </Typography>
         </div>
       </Paper>

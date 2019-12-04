@@ -93,7 +93,7 @@ const BlockContainer = props => {
     );
   }
 
-  const itemsPage = items.slice(
+  const itemsPage = props.pageSize === 0 ? items : items.slice(
     displayPage * props.pageSize,
     (1 + displayPage) * props.pageSize
   );

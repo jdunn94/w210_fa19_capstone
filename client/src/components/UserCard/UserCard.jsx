@@ -121,7 +121,7 @@ const UserCard = props => {
       props.data.get("users").properties.location
     } | Followers: ${
       props.data.get("users").properties.followers_count
-    } | Friends: ${props.data.get("users").properties.friend_count}`;
+    }`;
   }
 
   // role
