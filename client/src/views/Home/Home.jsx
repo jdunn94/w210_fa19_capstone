@@ -32,12 +32,11 @@ const Home = props => {
       <Paper className={classes.paper}>
         <Typography
           variant="h2"
-          gutterBottom
           style={{ textAlign: "center", color: "#0091ea" }}
         >
           mic-check.ai
         </Typography>
-        <Typography style={{ textAlign: "center", color: "#607d8b" }}>
+        <Typography variant="h6" style={{ textAlign: "center", color: "#607d8b" }} gutterBottom>
           Connecting nonprofits to the communities they serve
         </Typography>
         <div className={classes.body}>

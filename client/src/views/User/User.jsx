@@ -43,10 +43,11 @@ const User = props => {
   yield node as u_others, score
   OPTIONAL match (u_others)-[r2:TWEETS_ABOUT {persona: r.persona}]->(o)
   where u_others <> u
-  WITH u,r,t,o,r2,h
-  order by t.favorite_count + t.retweet_count DESC
+  OPTIONAL match (u_others)-[:COMMON_HASHTAG]->(h2:Hashtag)<-[:GENERATED]-(o)
+  WITH u,r,t,o,r2,h,h2
+  order by t.favorite_count + t.retweet_count DESC, h2.topical_count desc, h.topical_count desc
   return u as users, collect(distinct t)[..3] as tweets, collect(distinct h) as hashtags, r as role, o as topic,
-    {topical_volume: avg(r2.topical_volume), topical_retweets: avg(r2.topical_retweets)} as r2_stats
+    {topical_volume: avg(r2.topical_volume), topical_retweets: avg(r2.topical_retweets), hashtags: collect(distinct h2)} as r2_stats
     ORDER BY u.followers_count + u.friend_count
   `;
 

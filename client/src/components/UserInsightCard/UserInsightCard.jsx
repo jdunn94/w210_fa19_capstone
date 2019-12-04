@@ -6,11 +6,11 @@ import { grey } from "@material-ui/core/colors";
 import { Card, Typography, CardContent, Link } from "@material-ui/core";
 import { decodeEntities, toTitleCase } from "../../utilities";
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
 
 const useStyles = makeStyles({
   card: {
@@ -52,6 +52,7 @@ const UserInsightCard = props => {
   const roleProps = props.data.get("role").properties;
   const topicProps = props.data.get("topic").properties;
   const statProps = props.data.get("r2_stats");
+  const hashtags = props.data.get("hashtags");
 
   const handleNavigateTopic = () => {
     props.history.push("/results/All%20Locations/" + topicProps.name);
@@ -103,51 +104,81 @@ const UserInsightCard = props => {
       be specific or could be nonsense.*/
   const insights = (
     <div>
-    <Table className={classes.table} size="small" aria-label="a dense table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Dimension</TableCell>
-              <TableCell align="right">This User</TableCell>
-              <TableCell align="right">All Users</TableCell>
-              <TableCell align="left">Outcome</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Topical Volume
-                </TableCell>
-                <TableCell align="right">{(roleProps.topical_volume * 100).toFixed(2)}%</TableCell>
-                <TableCell align="right">{(statProps.topical_volume * 100).toFixed(2)}%</TableCell>
-                <TableCell align="left">{roleProps.topical_volume > 2*statProps.topical_volume ?
-                  "This is a high volume of tweets. This user may particularly be interested in this specific topic more so than others in this group." :
-                  "This is an average or low volume of tweets. This user may occasionally tweet about this specific topic but may not be focused on this one issue."}
-                  </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Topical Retweets
-                </TableCell>
-                <TableCell align="right">{(roleProps.topical_retweets * 100).toFixed(2)}%</TableCell>
-                <TableCell align="right">{(statProps.topical_retweets * 100).toFixed(2)}%</TableCell>
-                <TableCell align="left">{roleProps.topical_volume > 2*statProps.topical_volume ?
-                  "This is a large amount of retweets. This user has considerable influence in their network." :
-                  "This is a relatively small amount of retweets. This user may not have as much influence in their network as users in other networks."}
-                  </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  Common hashtags
-                </TableCell>
-                <TableCell align="right">none</TableCell>
-                <TableCell align="right">none</TableCell>
-                <TableCell align="left">{roleProps.topical_volume > 2*statProps.topical_volume ?
-                  "These are very common hashtags for this TOPIC LOCATION combination. This user may be aligned with a larger movement or these hashtags could be fairly generic." :
-                  "This is a relatively small amount of retweets. This user may not have as much influence in their network as users in other networks."}
-                  </TableCell>
-              </TableRow>
-          </TableBody>
-        </Table>        
+      <Table className={classes.table} size="small" aria-label="a dense table">
+        <TableHead>
+          <TableRow>
+            <TableCell style={{ width: "20%" }}>Dimension</TableCell>
+            <TableCell style={{ width: "20%" }} align="right">
+              This User
+            </TableCell>
+            <TableCell style={{ width: "20%" }} align="right">
+              All Users
+            </TableCell>
+            <TableCell align="left">Outcome</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell component="th" scope="row">
+              Topical Volume
+            </TableCell>
+            <TableCell align="right">
+              {(roleProps.topical_volume * 100).toFixed(2)}%
+            </TableCell>
+            <TableCell align="right">
+              {(statProps.topical_volume * 100).toFixed(2)}%
+            </TableCell>
+            <TableCell align="left">
+              {roleProps.topical_volume > 2 * statProps.topical_volume
+                ? "This is a high volume of tweets. This user may particularly be interested in this specific topic more so than others in this group."
+                : "This is an average or low volume of tweets. This user may occasionally tweet about this specific topic but may not be focused on this one issue."}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">
+              Topical Retweets
+            </TableCell>
+            <TableCell align="right">
+              {(roleProps.topical_retweets * 100).toFixed(2)}%
+            </TableCell>
+            <TableCell align="right">
+              {(statProps.topical_retweets * 100).toFixed(2)}%
+            </TableCell>
+            <TableCell align="left">
+              {roleProps.topical_retweets > 2 * statProps.topical_retweets
+                ? "This is a large amount of retweets. This user has considerable influence in their network."
+                : "This is a relatively small amount of retweets. This user may not have as much influence in their network as users in other networks."}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell component="th" scope="row">
+              Common hashtags
+            </TableCell>
+            <TableCell align="right">
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {hashtags.map((a, i) => (
+                  <Typography
+                    key={i}
+                    variant="p"
+                  >{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
+                ))}
+              </div>
+            </TableCell>
+            <TableCell align="right">
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {statProps.hashtags.slice(1, 4).map((a, i) => (
+                  <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
+                ))}
+              </div>
+            </TableCell>
+            <TableCell align="left">
+              {hashtags.count > 2
+                ? "These are very common hashtags for this TOPIC LOCATION combination. This user may be aligned with a larger movement or these hashtags could be fairly generic."
+                : "These are very uncommon hashtags for this TOPIC LOCATION combination. This may be a unique hashtag and could be specific or could be nonsense."}
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   );
 
