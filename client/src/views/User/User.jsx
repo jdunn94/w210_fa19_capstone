@@ -37,8 +37,8 @@ const User = props => {
   const userInsightQuery = `
   MATCH (u:User {screen_name: "${props.match.params.name}"})-[r:TWEETS_ABOUT]->(o:Topic)
   WHERE r.topical_volume > 0 and r.persona <> "Unknown"
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
-  match (u)-[:COMMON_HASHTAG]->(h:Hashtag)<-[:GENERATED]-(o)
+  optional match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  optional match (u)-[:COMMON_HASHTAG]->(h:Hashtag)<-[:GENERATED]-(o)
   with u,r,o,h,t
   order by t.favorite_count + t.retweet_count DESC, h.topical_count desc
   with u,r,o,collect(distinct h) as hashtags, collect(distinct t) as tweets

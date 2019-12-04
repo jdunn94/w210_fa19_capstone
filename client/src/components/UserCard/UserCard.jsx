@@ -114,10 +114,7 @@ const UserCard = props => {
   };
 
   // headline
-  let headline = `${props.data.get("users").properties.followers_count} Followers | ${
-	  !!props.data.get("users").properties.friend_count 
-		  ? props.data.get("users").properties.friend_count.toString()  
-		  : "0"} Friends`;
+  let headline = `${props.data.get("users").properties.followers_count} Followers`;
 
   if (props.withLocation) {
     headline = `${props.data.get("users").properties.name} | ${

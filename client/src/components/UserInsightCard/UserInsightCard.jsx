@@ -205,8 +205,9 @@ const UserInsightCard = props => {
                 : "n/a"}
             </TableCell>
             <TableCell className={classes.cell} align="left">
-              {!localStatProps.topical_retweets || roleProps.topical_retweets >
-              2 * localStatProps.topical_retweets ? (
+              {!localStatProps.topical_retweets ||
+              roleProps.topical_retweets >
+                2 * localStatProps.topical_retweets ? (
                 <div>
                   <Typography variant="p">This is a </Typography>
                   <Typography variant="p" style={{ fontWeight: "bold" }}>
@@ -235,31 +236,47 @@ const UserInsightCard = props => {
               Common hashtags
             </TableCell>
             <TableCell className={classes.cell} align="right">
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {hashtags.map((a, i) => (
-                  <Typography
-                    key={i}
-                    variant="p"
-                  >{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
-                ))}
-              </div>
+              {hashtags.length === 0 ? (
+                <Typography variant="p">None</Typography>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {hashtags.map((a, i) => (
+                    <Typography
+                      key={i}
+                      variant="p"
+                    >{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
+                  ))}
+                </div>
+              )}
             </TableCell>
             <TableCell className={classes.cell} align="right">
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {localStatProps.hashtags.slice(0, 4).map((a, i) => (
-                  <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
-                ))}
-              </div>
+              {localStatProps.hashtags.length === 0 ? (
+                <Typography variant="p">None</Typography>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {localStatProps.hashtags.slice(0, 4).map((a, i) => (
+                    <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
+                  ))}
+                </div>
+              )}
             </TableCell>
             <TableCell className={classes.cell} align="right">
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {allStatProps.hashtags.slice(0, 4).map((a, i) => (
-                  <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
-                ))}
-              </div>
+              {allStatProps.hashtags.length === 0 ? (
+                <Typography variant="p">None</Typography>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {allStatProps.hashtags.slice(0, 4).map((a, i) => (
+                    <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
+                  ))}
+                </div>
+              )}
             </TableCell>
             <TableCell className={classes.cell} align="left">
-              {hashtags.count > 2 ? (
+              {hashtags.length === 0 ? (
+                <Typography variant="p">
+                  This user hasn't used any hashtags on this topic.
+                </Typography>
+              ) : hashtags.length > 2 ? (
                 <div>
                   <Typography variant="p">These are</Typography>
                   <Typography variant="p" style={{ fontWeight: "bold" }}>

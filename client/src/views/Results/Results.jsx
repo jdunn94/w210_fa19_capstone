@@ -63,7 +63,7 @@ const Results = props => {
   ${userMatchClause}
   MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
   WHERE r.topical_volume > 0 and r.persona <> "Unknown"
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  optional match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
   WITH u,r,t
   order by t.favorite_count + t.retweet_count DESC
   return u as users, collect(distinct t) as tweets, r as role
@@ -102,7 +102,8 @@ const Results = props => {
   ORDER BY u.followers_count + u.friend_count
   `;
 
-  console.log(tweetQuery);
+  console.log(userQuery)
+  console.log(thoughtLeaderQuery);
 
   return (
     <React.Fragment>
