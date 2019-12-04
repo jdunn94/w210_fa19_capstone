@@ -1,22 +1,22 @@
 import React from "react";
 import { Helmet } from "react-helmet";
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Divider, Grid } from "@material-ui/core";
+import { Divider, Grid } from "@material-ui/core";
 
-import {
-  BlockContainer,
-  UserCard,
-  HashtagCard,
-  TweetCard
-} from "../../components";
+import { BlockContainer, UserCard, TweetCard } from "../../components";
+
+import { LeaderBoard } from "./components";
 
 const useStyles = makeStyles(theme => ({
   page: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   resultsHeader: {
     marginTop: theme.spacing(2),
     marginLeft: theme.spacing(2)
+  },
+  leaderboard: {
+    height: "250px"
   }
 }));
 
@@ -43,13 +43,17 @@ const Results = props => {
       ? ""
       : `{name: "${props.match.params.topic}"}`;
 
+  // The more OR's in the search, the lower the score.
+  // Tested on BarackObama and needed a 0.38 score cutoff
   const userMatchClause =
     props.match.params.location === "All Locations"
       ? "match (u:User)"
-      : `CALL db.index.fulltext.queryNodes("userLocation", '${locationsClause}') yield node as u, score where score > 1`;
+      : `CALL db.index.fulltext.queryNodes("userLocation", '${locationsClause}') yield node as u, score where score > 0.35`;
 
   const tweetQuery = `
   ${userMatchClause}
+  MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
+  WHERE r.topical_volume > 0
   match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[]-(o:Topic ${topicClause})
   return u as users, t as tweets
   ORDER BY t.favorite_count + t.retweet_count DESC, u.followers_count + u.friend_count
@@ -57,45 +61,104 @@ const Results = props => {
 
   const userQuery = `
   ${userMatchClause}
-  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[]-(o:Topic ${topicClause})
-  WITH u,t
+  MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
+  WHERE r.topical_volume > 0 and r.persona <> "Unknown"
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  WITH u,r,t
   order by t.favorite_count + t.retweet_count DESC
-  return u as users, collect(t) as tweets
+  return u as users, collect(t) as tweets, r as role
   ORDER BY u.followers_count + u.friend_count
   `;
 
-  console.log(userQuery);
-
-  const hashtagQuery = `
-  MATCH (:Topic ${topicClause})-[:GENERATED]->(t:Tweet)<-[:POPULAR_TWEETED]-(u:User)-[:COMMON_HASHTAG]->(h:Hashtag)
-  RETURN h, h.name, h.topical_count ORDER BY h.topical_count DESC
+  const thoughtLeaderQuery = `
+  ${userMatchClause}
+  MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
+  WHERE r.topical_volume > 0 and r.persona = "thought_leader"
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  WITH u,r,t
+  order by t.favorite_count + t.retweet_count DESC
+  return u as users, collect(t) as tweets, r as role
+  ORDER BY u.followers_count + u.friend_count
   `;
+
+  const contentCreatorQuery = `
+  ${userMatchClause}
+  MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
+  WHERE r.topical_volume > 0 and r.persona = "content_creator"
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  WITH u,r,t
+  order by t.favorite_count + t.retweet_count DESC
+  return u as users, collect(t) as tweets, r as role
+  ORDER BY u.followers_count + u.friend_count
+  `;
+
+  const amplifierQuery = `
+  ${userMatchClause}
+  MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
+  WHERE r.topical_volume > 0 and r.persona = "amplifier"
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  WITH u,r,t
+  order by t.favorite_count + t.retweet_count DESC
+  return u as users, collect(t) as tweets, r as role
+  ORDER BY u.followers_count + u.friend_count
+  `;
+
+  const watchdogQuery = `
+  ${userMatchClause}
+  MATCH (u)-[r:TWEETS_ABOUT]->(o:Topic ${topicClause})
+  WHERE r.topical_volume > 0 and r.persona = "watchdog"
+  match (u)-[:POPULAR_TWEETED]->(t:Tweet)<-[:GENERATED]-(o)
+  WITH u,r,t
+  order by t.favorite_count + t.retweet_count DESC
+  return u as users, collect(t) as tweets, r as role
+  ORDER BY u.followers_count + u.friend_count
+  `;
+
+  console.log(tweetQuery);
 
   return (
     <React.Fragment>
       <Helmet>
-        <title>MC.AI - Results</title>
+        <title>
+          mic-check.ai - {props.match.params.topic} /{" "}
+          {props.match.params.location}
+        </title>
       </Helmet>
       <Grid
         container
         className={classes.page}
         direction="row"
-        xs={12}
         justify="flex-start"
         alignItems="flex-start"
         spacing={2}
       >
-        <Grid container item spacing={2} direction="row" justify="flex-start" alignItems="flex-start">
-          <Grid item sm={8}>
-            <Typography className={classes.resultsHeader} variant="h2">
-              Search results
-            </Typography>
-          </Grid>
-          <Grid container item sm={4} zeroMinWidth>
-            <BlockContainer query={hashtagQuery} cardHeight={"100px"} noFlatten>
-              <HashtagCard />
-            </BlockContainer>
-          </Grid>
+        <Grid item sm={3} className={classes.leaderboard}>
+          <BlockContainer
+            query={thoughtLeaderQuery}
+            cardHeight={"176px"}
+            passThru
+          >
+            <LeaderBoard title={"Thought Leaders"} history={props.history} />
+          </BlockContainer>
+        </Grid>
+        <Grid item sm={3} className={classes.leaderboard}>
+          <BlockContainer
+            query={contentCreatorQuery}
+            cardHeight={"176px"}
+            passThru
+          >
+            <LeaderBoard title={"Content Creators"} history={props.history} />
+          </BlockContainer>
+        </Grid>
+        <Grid item sm={3} className={classes.leaderboard}>
+          <BlockContainer query={amplifierQuery} cardHeight={"176px"} passThru>
+            <LeaderBoard title={"Amplifiers"} history={props.history} />
+          </BlockContainer>
+        </Grid>
+        <Grid item sm={3} className={classes.leaderboard}>
+          <BlockContainer query={watchdogQuery} cardHeight={"176px"} passThru>
+            <LeaderBoard title={"Watchdogs"} history={props.history} />
+          </BlockContainer>
         </Grid>
         <Grid item sm={12}>
           <Divider variant="middle" />
@@ -115,7 +178,7 @@ const Results = props => {
           <Grid container item sm={4} alignItems="flex-start">
             <BlockContainer
               query={tweetQuery}
-              cardHeight={"75px"}
+              cardHeight={"275px"}
               title={"Popular Tweets"}
               pageSize={5}
               multiple

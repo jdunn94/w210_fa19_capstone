@@ -19,7 +19,7 @@ const Hashtag = props => {
   return (
     <div className={classes.page}>
       <Helmet>
-        <title>MC.AI - Hashtag Info</title>
+        <title>Mic-Check.AI - Hashtag Info</title>
       </Helmet>
       <Typography>Hashtag info for {props.match.params.name}...</Typography>
       <div

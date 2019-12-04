@@ -1,14 +1,10 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
-import { Typography, Link } from "@material-ui/core";
+import { Card, CardContent, Typography, Link, makeStyles } from "@material-ui/core";
 import logo from "./logo.png";
 import heart from "./heart.png";
 import tweet from "./tweet.png";
 import person from "./people.png";
+import { decodeEntities } from "../../utilities";
 
 const useStyles = makeStyles({
   card: {
@@ -82,12 +78,6 @@ const useStyles = makeStyles({
 const TweetCard = props => {
   const classes = useStyles();
 
-  const handleClick = event => {
-    props.history.push(
-      `/tweet/${props.data.get("tweets").properties.id.toString()}`
-    );
-  };
-
   return (
     <Card className={classes.card}>
       <CardContent>
@@ -127,7 +117,7 @@ const TweetCard = props => {
           </tbody>
         </table>
         <Typography className={classes.quotedTweet} gutterBottom>
-          {props.data.get("tweets").properties.text}
+          {decodeEntities(props.data.get("tweets").properties.text)}
         </Typography>
         <div>
           <Typography

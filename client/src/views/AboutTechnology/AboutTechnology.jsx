@@ -28,7 +28,7 @@ const AboutTechnology = props => {
   return (
     <div className={classes.page}>
       <Helmet>
-        <title>MC.AI - Technology</title>
+        <title>mic-check.ai - Technology</title>
       </Helmet>
       <Paper className={classes.paper}>
         <Typography variant="h2" gutterBottom>

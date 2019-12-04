@@ -10,7 +10,6 @@ import {
   Menu,
   MenuItem
 } from "@material-ui/core";
-import { indigo } from "@material-ui/core/colors";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { locations, topics } from "./searchOptions";
 import Grid from "@material-ui/core/Grid";
@@ -65,14 +64,6 @@ const Header = props => {
   const [topic, updateTopic] = useState(props.match.params.topic);
   const [location, updateLocation] = useState(props.match.params.location);
 
-  const handleChange = event => {
-    if (event.target.id === "topic") {
-      updateTopic(event.target.value);
-    } else if (event.target.id === "location") {
-      updateLocation(event.target.value);
-    }
-  };
-
   const handleChangeTopic = (event, value) => {
     updateTopic(value);
   };
@@ -101,7 +92,6 @@ const Header = props => {
     props.history.push(`/results/${location}/${topic}`);
   };
 
-  const cName = { className: "MuiAutocomplete-inputRootDense" };
   return (
     <AppBar position="static">
       <Toolbar className={classes.toolbar}>
@@ -152,7 +142,7 @@ const Header = props => {
             </Grid>
             <Grid item>
               <Typography variant="h6" className={classes.title}>
-                Mic-Check.AI
+                mic-check.ai
               </Typography>
             </Grid>
           </Grid>

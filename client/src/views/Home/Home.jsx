@@ -27,7 +27,7 @@ const Home = props => {
   return (
     <div className={classes.page}>
       <Helmet>
-        <title>MC.AI - Home</title>
+        <title>mic-check.ai</title>
       </Helmet>
       <Paper className={classes.paper}>
         <Typography variant="h2" gutterBottom>

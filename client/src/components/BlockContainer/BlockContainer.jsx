@@ -68,7 +68,7 @@ const BlockContainer = props => {
   }, [props.query, driver]);
 
   if (isLoading) {
-    const count = props.noFlatten ? [0] : [0, 1, 2];
+    const count = props.passThru ? [0] : [0, 1, 2];
     return (
       <Grid container item className={classes.results} direction="column" spacing={2}>
         {props.title && (
@@ -78,15 +78,14 @@ const BlockContainer = props => {
         )}
         {count.map((a, i) => (
           <Grid item key={i}>
-            <Skeleton variant="rect" className={classes.resultCard} />
+            <Skeleton variant="rect" style={{minWidth:"100%", minHeight:props.cardHeight}} />
           </Grid>
         ))}
       </Grid>
     );
   }
 
-  console.log(items);
-  if (items.length === 0) {
+  if (items.length === 0 && !props.passThru) {
     return (
       <Card style={{ width: "100%" }}>
         <Typography>No results</Typography>
@@ -142,9 +141,9 @@ const BlockContainer = props => {
   }
 
   let children;
-  if (props.noFlatten) {
+  if (props.passThru) {
     children = (
-      <Grid item>
+      <Grid item style={{width: "100%", height:"100%"}}>
         {React.cloneElement(props.children, {
           data: itemsPage
         })}
@@ -179,9 +178,11 @@ const BlockContainer = props => {
       spacing={1}
       justify="flex-start"
       alignItems="flex-start"
+      alignContent="flex-start"
       direction="row"
       className={classes.results}
       sm={12}
+      style={{height:"100%"}}
     >
       {header}
       {children}
@@ -195,12 +196,12 @@ BlockContainer.propTypes = {
   title: PropTypes.string,
   multiple: PropTypes.bool,
   pageSize: PropTypes.number,
-  noFlatten: PropTypes.bool
+  passThru: PropTypes.bool
 };
 
 BlockContainer.defaultProps = {
   pageSize: 20,
-  noFlatten: false
+  passThru: false
 };
 
 export default BlockContainer;

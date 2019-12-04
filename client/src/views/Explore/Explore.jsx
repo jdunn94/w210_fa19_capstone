@@ -26,19 +26,11 @@ const useStyles = makeStyles(theme => ({
 
 const Explore = props => {
   const classes = useStyles();
-
-  const handleExplore = event => {
-    props.history.push(`/explore`);
-  };
-
-  const handleSearch = (what, where) => {
-    props.history.push(`/results/${where}/${what}`);
-  };
-
+  
   return (
     <Grid item className={classes.searchPage}>
       <Helmet>
-        <title>MC.AI - Explore</title>
+        <title>mic-check.ai - Explore</title>
       </Helmet>
       <div className={classes.mapBackground}>
         <MapViewer hover={props.match.params.explore} />

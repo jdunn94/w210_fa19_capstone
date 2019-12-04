@@ -1,15 +1,19 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Link from "@material-ui/core/Link";
-import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
-import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
+import {
+  Link,
+  Card,
+  CardActions,
+  CardContent,
+  Button,
+  Typography,
+  makeStyles
+} from "@material-ui/core";
 import PropTypes from "prop-types";
 import logo from "./logo.png";
 import heart from "./heart.png";
 import person from "./people.png";
+import { decodeEntities, toTitleCase } from "../../utilities";
+
 
 const useStyles = makeStyles({
   card: {
@@ -97,7 +101,7 @@ const UserCard = props => {
           <b>
             {created} | RT: {retweets} | F: {favorites}
           </b>{" "}
-          {text}
+          {decodeEntities(text)}
         </Typography>
       </div>
     );
@@ -111,24 +115,29 @@ const UserCard = props => {
   if (props.withLocation) {
     headline = `${props.data.get("users").properties.name} | ${
       props.data.get("users").properties.location
-    } | Followers: ${props.data.get("users").properties.followers_count} | Friends: ${
-      props.data.get("users").properties.friend_count
-    }`;
+    } | Followers: ${
+      props.data.get("users").properties.followers_count
+    } | Friends: ${props.data.get("users").properties.friend_count}`;
   }
 
   // role
-  const role = (
-    <Typography variant="body2" component="p" gutterBottom className={classes.entrySubtitle}>
-      <b>Role:</b> Community Leader
+  const role = props.topicSpecific ? (
+    <Typography
+      variant="body2"
+      component="p"
+      gutterBottom
+      className={classes.entrySubtitle}
+    >
+      <b>Role:</b> {toTitleCase(props.data.get("role").properties.persona)}
     </Typography>
-  );
+  ): null;
 
   // tweets
   const userTweets = !props.topicSpecific ? null : (
     <div>
       <br />
       <Typography variant="subtitle2" className={classes.entrySubtitle}>
-	  <b>Popular tweets:</b>
+        <b>Popular tweets:</b>
       </Typography>
       {props.data.get("tweets").map(a => tweetToLine(a))}
     </div>
@@ -146,62 +155,64 @@ const UserCard = props => {
   return (
     <Card className={classes.card}>
       <CardContent>
-          <table width="100%" className={classes.table}>
-            <tbody>
-              <tr className={classes.th}>
-                <td rowSpan="2" className={classes.th}>
-                  <img src={person} alt="Person" className={classes.icon} />
-                </td>
-                <td className={classes.entryTitle} className={classes.th}>
-                  <Link
-                    href={
-                      "https://twitter.com/" +
-                      props.data.get("users").properties.screen_name
-                    }
-                    target="_blank"
-                    rel="noopener"
-                    color="inherit"
-                    variant="h6"
-                    gutterBottom
-                    activeStyle={{ color: "#00acee" }}
-                  >
-                    {props.data.get("users").properties.name}
-                  </Link>
-                </td>
-                <td width="60%" rowSpan="2" className={classes.th}>
-                  <img src={logo} alt="Logo" align="right" />
-                </td>
-              </tr>
-              <tr className={classes.th}>
-                <td className={classes.entrySubtitle} border="0">
-                  @{props.data.get("users").properties.screen_name}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <table width="100%" className={classes.table}>
+          <tbody>
+            <tr className={classes.th}>
+              <td rowSpan="2" className={classes.th}>
+                <img src={person} alt="Person" className={classes.icon} />
+              </td>
+              <td className={classes.entryTitle} className={classes.th}>
+                <Link
+                  href={
+                    "https://twitter.com/" +
+                    props.data.get("users").properties.screen_name
+                  }
+                  target="_blank"
+                  rel="noopener"
+                  color="inherit"
+                  variant="h6"
+                  gutterBottom
+                  activeStyle={{ color: "#00acee" }}
+                >
+                  {props.data.get("users").properties.name}
+                </Link>
+              </td>
+              <td width="60%" rowSpan="2" className={classes.th}>
+                <img src={logo} alt="Logo" align="right" />
+              </td>
+            </tr>
+            <tr className={classes.th}>
+              <td className={classes.entrySubtitle} border="0">
+                @{props.data.get("users").properties.screen_name}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <Typography
+          variant="body2"
+          component="p"
+          className={classes.entrySubtitle}
+        ></Typography>
+        {props.topicSpecific && userTweets}
+        {props.topicSpecific && role}
         <Typography
           variant="body2"
           component="p"
           className={classes.entrySubtitle}
         >
+          <b>Description:</b> {decodeEntities(props.data.get("users").properties.description)}
         </Typography>
-	{props.topicSpecific && userTweets}
-	{props.topicSpecific && role}
-	<Typography variant="body2" component="p" className={classes.entrySubtitle}>
-          <b>Description:</b> {props.data.get("users").properties.description}
-        </Typography>
-	<div>
+        <div>
           <Typography
             variant="body2"
             component="p"
             className={classes.entrySubtitle}
           >
-	    <br />
+            <br />
             <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
-            {headline} 	
-	  </Typography>
+            {headline}
+          </Typography>
         </div>
-
       </CardContent>
       {props.profileLink && linkToProfile}
     </Card>
