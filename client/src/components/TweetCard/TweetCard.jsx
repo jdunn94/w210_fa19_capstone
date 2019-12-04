@@ -84,10 +84,10 @@ const TweetCard = props => {
         <table width="100%" className={classes.table}>
           <tbody>
             <tr className={classes.th}>
-              <td className={classes.th} rowSpan="2">
+              <td className={classes.th} rowSpan="2" width="5%">
                 <img src={person} alt="Person" className={classes.icon} />
               </td>
-              <td className={classes.th}>
+              <td className={classes.th} width="45%">
                 <Link
                   href={
                     "https://twitter.com/" +
@@ -105,7 +105,7 @@ const TweetCard = props => {
                   {props.data.get("users").properties.name}
                 </Link>
               </td>
-              <td width="60%" className={classes.th} rowSpan="2">
+              <td width="50%" className={classes.th} rowSpan="2">
                 <img src={logo} alt="Logo" align="right" />
               </td>
             </tr>

@@ -13,6 +13,7 @@ import logo from "./logo.png";
 import happyface from "./happyface.png";
 import heart from "./heart.png";
 import person from "./people.png";
+import retweet from "./retweet.png";
 import { decodeEntities, toTitleCase } from "../../utilities";
 
 
@@ -104,7 +105,9 @@ const UserCard = props => {
         </Typography>
 	<Typography gutterBottom className={classes.entrySubtitle}>
 	    <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
-	    Favorites: {favorites} | Retweets: {retweets} | {created} 
+	    Favorites: {favorites} | 
+	    <img src={retweet} alt="Retweet"/>
+	    Retweets: {retweets} | {created} 
     	</Typography>
      </div>
     );
@@ -162,10 +165,10 @@ const UserCard = props => {
         <table width="100%" className={classes.table}>
           <tbody>
             <tr className={classes.th}>
-              <td rowSpan="2" className={classes.th}>
+              <td rowSpan="2" className={classes.th} width="5%">
                 <img src={person} alt="Person" className={classes.icon} />
               </td>
-              <td className={classes.entryTitle} className={classes.th}>
+              <td className={classes.entryTitle} className={classes.th} width="35%">
                 <Link
                   href={
                     "https://twitter.com/" +
@@ -197,7 +200,7 @@ const UserCard = props => {
           component="p"
           className={classes.entrySubtitle}
         ></Typography>
-        {props.topicSpeciuserTweetsfic && userTweets}
+        {props.topicSpecific && userTweets}
         {props.topicSpecific && role}
         <Typography
           variant="body2"
