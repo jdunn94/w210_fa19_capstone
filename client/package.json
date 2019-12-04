@@ -6,6 +6,7 @@
     "@material-ui/core": "^4.7.1",
     "@material-ui/icons": "^4.5.1",
     "@material-ui/lab": "^4.0.0-alpha.34",
+    "gatsby-plugin-react-helmet": "^3.1.16",
     "neo4j-driver": "^1.7.6",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",

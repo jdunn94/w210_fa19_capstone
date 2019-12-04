@@ -59,7 +59,7 @@ const useStyles = makeStyles({
   },
   entrySubtitle: {
     fontFamily: "Arial, sans-serif !important",
-    maxWidth: "300px !important",
+    //maxWidth: "300px !important",
     color: "#7a7a7a",
     fontSize: "14px"
   },
@@ -104,22 +104,22 @@ const UserCard = props => {
   };
 
   // headline
-  let headline = `${
+  let headline = `Followers: ${
     props.data.get("users").properties.followers_count
-  } followers | ${props.data.get("users").properties.friend_count} friends`;
+  } | Friends: ${props.data.get("users").properties.friend_count}`;
 
   if (props.withLocation) {
     headline = `${props.data.get("users").properties.name} | ${
       props.data.get("users").properties.location
-    } | ${props.data.get("users").properties.followers_count} followers | ${
+    } | Followers: ${props.data.get("users").properties.followers_count} | Friends: ${
       props.data.get("users").properties.friend_count
-    } friends`;
+    }`;
   }
 
   // role
   const role = (
-    <Typography variant="body2" component="p" gutterBottom>
-      Role: Community Leader
+    <Typography variant="body2" component="p" gutterBottom className={classes.entrySubtitle}>
+      <b>Role:</b> Community Leader
     </Typography>
   );
 
@@ -127,7 +127,9 @@ const UserCard = props => {
   const userTweets = !props.topicSpecific ? null : (
     <div>
       <br />
-      <Typography variant="subtitle2">Popular tweets:</Typography>
+      <Typography variant="subtitle2" className={classes.entrySubtitle}>
+	  <b>Popular tweets:</b>
+      </Typography>
       {props.data.get("tweets").map(a => tweetToLine(a))}
     </div>
   );
@@ -166,7 +168,7 @@ const UserCard = props => {
                     {props.data.get("users").properties.name}
                   </Link>
                 </td>
-                <td width="70%" rowSpan="2" className={classes.th}>
+                <td width="60%" rowSpan="2" className={classes.th}>
                   <img src={logo} alt="Logo" align="right" />
                 </td>
               </tr>
@@ -182,14 +184,24 @@ const UserCard = props => {
           component="p"
           className={classes.entrySubtitle}
         >
-          <img src={heart} alt="Heart" align="left" />
-          {headline}
         </Typography>
-        {props.topicSpecific && role}
-        <Typography variant="body2" component="p">
+	{props.topicSpecific && userTweets}
+	{props.topicSpecific && role}
+	<Typography variant="body2" component="p" className={classes.entrySubtitle}>
           <b>Description:</b> {props.data.get("users").properties.description}
         </Typography>
-        {props.topicSpecific && userTweets}
+	<div>
+          <Typography
+            variant="body2"
+            component="p"
+            className={classes.entrySubtitle}
+          >
+	    <br />
+            <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
+            {headline} 	
+	  </Typography>
+        </div>
+
       </CardContent>
       {props.profileLink && linkToProfile}
     </Card>
