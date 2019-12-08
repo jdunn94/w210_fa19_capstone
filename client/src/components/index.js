@@ -6,3 +6,4 @@ export { default as HashtagCard } from "./HashtagCard";
 export { default as UserInsightCard } from "./UserInsightCard";
 export { default as BlockContainer } from "./BlockContainer";
 export { default as ScrollToTopOnMount } from "./ScrollToTopOnMount";
+export { default as StyledTooltip } from "./StyledTooltip";

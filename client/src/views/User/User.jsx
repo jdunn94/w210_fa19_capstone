@@ -47,21 +47,19 @@ const User = props => {
   CALL db.index.fulltext.queryNodes("userLocation", CASE u.location WHEN "" THEN "n9uag3094ghoefkdz" else '"""' + u.location +'"""' end)
   yield node as u_local, score
   OPTIONAL match (u_local)-[r2:TWEETS_ABOUT {persona: r.persona}]->(o)
-  where u_local <> u
   OPTIONAL match (u_local)-[:COMMON_HASHTAG]->(h2:Hashtag)<-[:GENERATED]-(o)
   with u,r,o,hashtags,tweets,r2,h2
   order by h2.topical_count desc
-  with u,r,o,hashtags,tweets,{topical_volume: avg(r2.topical_volume), topical_retweets: avg(r2.topical_retweets), hashtags: collect(distinct h2)} as local_stats
+  with u,r,o,hashtags,tweets,{topical_volume: collect(r2.topical_volume) , topical_retweets: collect(r2.topical_retweets), hashtags: collect(distinct h2)} as local_stats
   
   // find all users
   OPTIONAL match (u_all:User)-[r3:TWEETS_ABOUT {persona: r.persona}]->(o)
-  where u_all <> u
   OPTIONAL match (u_all)-[:COMMON_HASHTAG]->(h3:Hashtag)<-[:GENERATED]-(o)
   WITH u,r,o,hashtags,tweets,local_stats,r3,h3
   order by h3.topical_count desc
-  with u,r,o,hashtags,tweets,local_stats,{topical_volume: avg(r3.topical_volume), topical_retweets: avg(r3.topical_retweets), hashtags: collect(distinct h3)} as all_stats
+  with u,r,o,hashtags,tweets,local_stats,{topical_volume: collect(r3.topical_volume), topical_retweets: collect(r3.topical_retweets), hashtags: collect(distinct h3)} as all_stats
   return u as users, r as role, o as topic, hashtags, tweets, local_stats, all_stats
-    ORDER BY u.followers_count + u.friend_count
+  ORDER BY o.name asc
   `;
 
   console.log(userInsightQuery);

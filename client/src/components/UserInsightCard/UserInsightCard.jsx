@@ -3,16 +3,34 @@ import PropTypes from "prop-types";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { grey } from "@material-ui/core/colors";
-import { Card, Typography, CardContent, Link } from "@material-ui/core";
-import { decodeEntities, toTitleCase } from "../../utilities";
+import {
+  Card,
+  Typography,
+  CardContent,
+  Link,
+  SvgIcon
+} from "@material-ui/core";
+import { decodeEntities, toTitleCase, percentRank } from "../../utilities";
+
+import VolumeMuteIcon from "@material-ui/icons/VolumeMute";
+import VolumeDownIcon from "@material-ui/icons/VolumeDown";
+import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import { Boxplot, computeBoxplotStats } from "../Boxplot";
+// import { Boxplot, computeBoxplotStats } from "react-boxplot";
+import StyledTooltip from "../StyledTooltip";
+
+import { mdiHelpRhombus } from "@mdi/js";
 
 const useStyles = makeStyles({
+  boxplot: {
+    color: "red"
+  },
   card: {
     minWidth: 275
   },
@@ -50,7 +68,6 @@ const useStyles = makeStyles({
 const UserInsightCard = props => {
   const classes = useStyles();
 
-  console.log(props.data);
   const userProps = props.data.get("users").properties;
   const roleProps = props.data.get("role").properties;
   const topicProps = props.data.get("topic").properties;
@@ -58,8 +75,287 @@ const UserInsightCard = props => {
   const allStatProps = props.data.get("all_stats");
   const hashtags = props.data.get("hashtags");
 
+  const local_stats = {
+    topical_volume: {
+      absolute: roleProps.topical_volume
+    },
+    topical_retweets: {
+      absolute: roleProps.topical_retweets.toInt()
+    }
+  };
+
+  if (localStatProps.topical_volume.length > 0) {
+    const values = localStatProps.topical_volume;
+    local_stats.topical_volume = {
+      ...local_stats.topical_volume,
+      ...computeBoxplotStats(values),
+      count: values.length,
+      percentile: percentRank(
+        localStatProps.topical_volume,
+        roleProps.topical_volume
+      ),
+      values
+    };
+  }
+
+  if (localStatProps.topical_retweets.length > 0) {
+    const values = localStatProps.topical_retweets.map(a => a.toInt());
+    local_stats.topical_retweets = {
+      ...local_stats.topical_retweets,
+      ...computeBoxplotStats(values),
+      count: values.length,
+      percentile: percentRank(
+        localStatProps.topical_retweets,
+        roleProps.topical_retweets
+      ),
+      values
+    };
+  }
+
+  const all_stats = {
+    topical_volume: {
+      absolute: roleProps.topical_volume
+    },
+    topical_retweets: {
+      absolute: roleProps.topical_retweets.toInt()
+    }
+  };
+
+  if (allStatProps.topical_volume.length > 0) {
+    const values = allStatProps.topical_volume;
+    all_stats.topical_volume = {
+      ...all_stats.topical_volume,
+      ...computeBoxplotStats(values),
+      count: values.length,
+      percentile: percentRank(
+        allStatProps.topical_volume,
+        roleProps.topical_volume
+      ),
+      values
+    };
+  }
+
+  if (allStatProps.topical_retweets.length > 0) {
+    const values = allStatProps.topical_retweets.map(a => a.toInt());
+    all_stats.topical_retweets = {
+      ...all_stats.topical_retweets,
+      ...computeBoxplotStats(values),
+      count: values.length,
+      percentile: percentRank(
+        allStatProps.topical_retweets,
+        roleProps.topical_retweets
+      ),
+      values
+    };
+  }
+
   const handleNavigateTopic = () => {
     props.history.push("/results/All%20Locations/" + topicProps.name);
+  };
+
+  const comparisonCell = (stats, precision) => {
+    const helper =
+      stats.values && stats.values.length > 3 ? (
+        <div>
+          <Boxplot
+            width={200}
+            height={40}
+            orientation="horizontal"
+            min={Math.min(...stats.values) * 0.9}
+            max={Math.max(...stats.values) * 1.1}
+            stats={stats}
+          />
+          <div>
+            <Typography variant="caption">
+              User Value: {stats.absolute.toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              User Percentile: {(stats.percentile * 100).toFixed(0)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              Min: {Math.min(...stats.values).toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              Q1: {stats.quartile1.toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              Median: {stats.quartile2.toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              Mean:{" "}
+              {(
+                stats.values.reduce((a, b) => a + b, 0) / stats.values.length
+              ).toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              Q3: {stats.quartile3.toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">
+              Max: {Math.max(...stats.values).toFixed(precision)}
+            </Typography>
+            <br />
+            <Typography variant="caption">Count: {stats.count}</Typography>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <Typography variant="caption">
+            Not enough data for statistics
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            User Value: {stats.absolute.toFixed(precision)}
+          </Typography>
+          {stats.values && <br />}
+          {stats.values && (
+            <Typography variant="caption">
+              Mean:{" "}
+              {(
+                stats.values.reduce((a, b) => a + b, 0) / stats.values.length
+              ).toFixed(precision)}
+            </Typography>
+          )}
+          {stats.count && <br />}
+          {stats.count && (
+            <Typography variant="caption">Count: {stats.count}</Typography>
+          )}
+        </div>
+      );
+
+    const icon = !stats ? (
+      <SvgIcon>
+        <path d={mdiHelpRhombus} />
+      </SvgIcon>
+    ) : stats.absolute <= stats.quartile1 ? (
+      <VolumeMuteIcon htmlColor="red" />
+    ) : stats.absolute >= stats.quartile3 ? (
+      <VolumeUpIcon htmlColor="green" />
+    ) : (
+      <VolumeDownIcon htmlColor="#F2D63D" />
+    );
+
+    return (
+      <StyledTooltip arrow title={helper}>
+        {icon}
+      </StyledTooltip>
+    );
+  };
+
+  const hashtagCell = (user, population) => {
+    const populationValues = population.map(a =>
+      a.properties.topical_count.toInt()
+    );
+    const popStats =
+      populationValues.length === 0
+        ? null
+        : {
+            ...computeBoxplotStats(populationValues),
+            values: populationValues
+          };
+
+    const helper = !popStats ? (
+      <Typography variant="caption">
+        No hashtags used in this population.
+      </Typography>
+    ) : user.length === 0 ? (
+      <Typography variant="caption">No hashtags for this user.</Typography>
+    ) : (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div>
+          <Typography variant="subtitle2">
+            Hashtag topical count statistics
+          </Typography>
+        </div>
+        <Boxplot
+          width={200}
+          height={40}
+          orientation="horizontal"
+          min={Math.min(...popStats.values) * 0.9}
+          max={Math.max(...popStats.values) * 1.1}
+          stats={popStats}
+        />
+        <div>
+          <Typography variant="caption">
+            Min: {Math.min(...popStats.values).toFixed(0)}
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            Q1: {popStats.quartile1.toFixed(0)}
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            Median: {popStats.quartile2.toFixed(0)}
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            Mean:{" "}
+            {(
+              popStats.values.reduce((a, b) => a + b, 0) /
+              popStats.values.length
+            ).toFixed(0)}
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            Q3: {popStats.quartile3.toFixed(0)}
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            Max: {Math.max(...popStats.values).toFixed(0)}
+          </Typography>
+          <br />
+          <Typography variant="caption">
+            Count: {popStats.values.length}
+          </Typography>
+        </div>
+        <br />
+        <div style={{display: "flex", flexDirection: "column"}}>
+          <Typography variant="subtitle2">User hashtags</Typography>
+          <Typography variant="caption">
+            rank / hashtag / topical count
+          </Typography>
+          {hashtags.map((a, i) => (
+            <Typography key={i} variant="caption">
+              {`${population.findIndex(
+                b => b.properties.name === a.properties.name
+              ) + 1}: #${a.properties.name} (${a.properties.topical_count})`}
+            </Typography>
+          ))}
+        </div>
+      </div>
+    );
+
+    const userP =
+      user.length === 1
+        ? user[0].properties.topical_count
+        : user.reduce((a, b) => a + b.properties.topical_count, 0);
+    const popP =
+      population.length === 1
+        ? population[0].properties.topical_count
+        : population.reduce((a, b) => a + b.properties.topical_count, 0);
+    const percentage = userP / popP;
+    const icon =
+      population.length === 0 ? (
+        <span>n/a</span>
+      ) : percentage <= 0.25 ? (
+        <VolumeMuteIcon htmlColor="red" />
+      ) : percentage >= 0.75 ? (
+        <VolumeUpIcon htmlColor="green" />
+      ) : (
+        <VolumeDownIcon htmlColor="#F2D63D" />
+      );
+
+    return (
+      <StyledTooltip arrow title={helper}>
+        {icon}
+      </StyledTooltip>
+    );
   };
 
   const tweetToLine = tweet => {
@@ -81,57 +377,27 @@ const UserInsightCard = props => {
       </div>
     );
   };
-  /*
-  # User Insights Page
-  Two versions of copy for each user insight that will tell the user what the recommendation is based on whether the 
-  statistic is high or low
-  * Topical volume (LOGIC: If X% > 2 * Y%, SHOW VERSION 1 ELSE SHOW VERSION 2)
-      * Description: @JimmyDunn tweets about TOPIC X% of the time. The average user in the community leader role 
-      living in LOCATION tweets about TOPIC Y% of the time.
-      * VERSION 1: This is a high volume of tweets. This user may particularly be interested in this specific topic more so than 
-      others in this group.
-      * VERSION 2: This is an average or low volume of tweets. This user may occasionally tweet about this specific topic but may
-       not be focused on this one issue.
-  * Topical Retweets (LOGIC: If X% > 2 * Y%, SHOW VERSION 1 ELSE SHOW VERSION 2)
-      * Description: X% of @JimmyDunn tweets about TOPIC are retweeted by over 1000 users. The average user in the 
-      ROLE get retweeted by over 1000 people Y% of the time. 
-      * VERSION 1: This is a large amount of retweets. This user has considerable influence in their network.
-      * VERSION 2: This is a relatively small amount of retweets. This user may not have as much influence in their network as 
-      users in other networks.
-  * Common Hashtags (LOGIC: If 2 or more HASHTAGs for this user are also in the common HASHTAGS for the entire topic, SHOW VERSION 1 ELSE SHOW VERSION 2)
-      * Description: HASHTAG1, HASHTAG2, and HASHTAG3 are the most common hashtags used by @JimmyDunn
-      * VERSION 1: These are very common hashtags for this TOPIC LOCATION combination. This user may be aligned with a larger 
-      movement or these hashtags could be fairly generic.
-      * VERSION 2: These are very uncommon hashtags for this TOPIC LOCATION combination. This may be a unique hashtag and could 
-      be specific or could be nonsense.*/
   const insights = (
     <div>
       <Table className={classes.table} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell style={{ width: "10%" }} className={classes.cell}>
+            <TableCell style={{ width: "18%" }} className={classes.cell}>
               Dimension
             </TableCell>
             <TableCell
-              style={{ width: "20%" }}
+              style={{ width: "18%" }}
               className={classes.cell}
-              align="right"
+              align="center"
             >
-              This User
+              User location
             </TableCell>
             <TableCell
-              style={{ width: "20%" }}
+              style={{ width: "18%" }}
               className={classes.cell}
-              align="right"
+              align="center"
             >
-              This Location
-            </TableCell>
-            <TableCell
-              style={{ width: "20%" }}
-              className={classes.cell}
-              align="right"
-            >
-              All Locations
+              All locations
             </TableCell>
             <TableCell className={classes.cell} align="left">
               Outcome
@@ -143,44 +409,35 @@ const UserInsightCard = props => {
             <TableCell className={classes.cell} component="th" scope="row">
               Topical Volume
             </TableCell>
-            <TableCell className={classes.cell} align="right">
-              {(roleProps.topical_volume * 100).toFixed(2)}%
+            <TableCell className={classes.cell} align="center">
+              {comparisonCell(local_stats.topical_volume, 2)}
             </TableCell>
-            <TableCell className={classes.cell} align="right">
-              mean:{" "}
-              {!!localStatProps.topical_volume
-                ? `${(localStatProps.topical_volume * 100).toFixed(2)}%`
-                : "n/a"}
-            </TableCell>
-            <TableCell className={classes.cell} align="right">
-              mean:{" "}
-              {!!allStatProps.topical_volume
-                ? `${(allStatProps.topical_volume * 100).toFixed(2)}%`
-                : "n/a"}
+            <TableCell className={classes.cell} align="center">
+              {comparisonCell(all_stats.topical_volume, 2)}
             </TableCell>
             <TableCell className={classes.cell} align="left">
-              {!localStatProps.topical_volume ||
-              roleProps.topical_volume > 2 * localStatProps.topical_volume ? (
+              {!local_stats.topical_volume.values ? (
                 <div>
-                  <Typography variant="p">This is a </Typography>
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    high volume of tweets
-                  </Typography>
-                  <Typography variant="p">
-                    . This user may particularly be interested in this specific
-                    topic more so than others in this group.
-                  </Typography>
+                  There is too little data for this community to make an
+                  inference.
+                </div>
+              ) : roleProps.topical_volume >=
+                local_stats.topical_volume.quartile3 ? (
+                <div>
+                  This is a <b>high volume of tweets</b>. This user may
+                  particularly be interested in this specific topic more so than
+                  others in this group.
+                </div>
+              ) : roleProps.topical_volume <=
+                local_stats.topical_volume.quartile1 ? (
+                <div>
+                  This is an <b>average or low volume of tweets</b>. This user
+                  may occasionally tweet about this specific topic but may not
+                  be focused on this one issue.
                 </div>
               ) : (
                 <div>
-                  <Typography variant="p">This is an </Typography>{" "}
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    average or low volume of tweets
-                  </Typography>
-                  <Typography variant="p">
-                    . This user may occasionally tweet about this specific topic
-                    but may not be focused on this one issue.
-                  </Typography>
+                  This is a <b>typical volume of tweets</b>.
                 </div>
               )}
             </TableCell>
@@ -189,44 +446,34 @@ const UserInsightCard = props => {
             <TableCell className={classes.cell} component="th" scope="row">
               Topical Retweets
             </TableCell>
-            <TableCell className={classes.cell} align="right">
-              {roleProps.topical_retweets.toString()}
+            <TableCell className={classes.cell} align="center">
+              {comparisonCell(local_stats.topical_retweets, 0)}
             </TableCell>
-            <TableCell className={classes.cell} align="right">
-              mean:{" "}
-              {!!localStatProps.topical_retweets
-                ? localStatProps.topical_retweets.toFixed(0)
-                : "n/a"}
-            </TableCell>
-            <TableCell className={classes.cell} align="right">
-              mean:{" "}
-              {!!allStatProps.topical_retweets
-                ? allStatProps.topical_retweets.toFixed(0)
-                : "n/a"}
+            <TableCell className={classes.cell} align="center">
+              {comparisonCell(all_stats.topical_retweets, 0)}
             </TableCell>
             <TableCell className={classes.cell} align="left">
-              {!localStatProps.topical_retweets ||
-              roleProps.topical_retweets >
-                2 * localStatProps.topical_retweets ? (
+              {!local_stats.topical_retweets.values ? (
                 <div>
-                  <Typography variant="p">This is a </Typography>
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    large amount of retweets
-                  </Typography>
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    . This user has considerable influence in their network.
-                  </Typography>
+                  There is too little data for this community to make an
+                  inference.
+                </div>
+              ) : roleProps.topical_retweets >=
+                local_stats.topical_retweets.quartile3 ? (
+                <div>
+                  This is a <b>large amount of retweets</b>. This user has
+                  considerable influence in their network.
+                </div>
+              ) : roleProps.topical_retweets <=
+                local_stats.topical_retweets.quartile1 ? (
+                <div>
+                  This is a<b>relatively small amount of retweets</b>. This user
+                  may not have as much influence in their network as users in
+                  other networks.
                 </div>
               ) : (
                 <div>
-                  <Typography variant="p">This is a </Typography>
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    relatively small amount of retweets
-                  </Typography>
-                  <Typography variant="p">
-                    . This user may not have as much influence in their network
-                    as users in other networks.
-                  </Typography>
+                  This is a <b>typical amount of tweets</b>.
                 </div>
               )}
             </TableCell>
@@ -235,69 +482,26 @@ const UserInsightCard = props => {
             <TableCell className={classes.cell} component="th" scope="row">
               Common hashtags
             </TableCell>
-            <TableCell className={classes.cell} align="right">
-              {hashtags.length === 0 ? (
-                <Typography variant="p">None</Typography>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {hashtags.map((a, i) => (
-                    <Typography
-                      key={i}
-                      variant="p"
-                    >{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
-                  ))}
-                </div>
-              )}
+            <TableCell className={classes.cell} align="center">
+              {hashtagCell(hashtags, localStatProps.hashtags)}
             </TableCell>
-            <TableCell className={classes.cell} align="right">
-              {localStatProps.hashtags.length === 0 ? (
-                <Typography variant="p">None</Typography>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {localStatProps.hashtags.slice(0, 4).map((a, i) => (
-                    <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
-                  ))}
-                </div>
-              )}
-            </TableCell>
-            <TableCell className={classes.cell} align="right">
-              {allStatProps.hashtags.length === 0 ? (
-                <Typography variant="p">None</Typography>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {allStatProps.hashtags.slice(0, 4).map((a, i) => (
-                    <Typography variant="p">{`#${a.properties.name} (${a.properties.topical_count})`}</Typography>
-                  ))}
-                </div>
-              )}
+            <TableCell className={classes.cell} align="center">
+              {hashtagCell(hashtags, allStatProps.hashtags)}
             </TableCell>
             <TableCell className={classes.cell} align="left">
               {hashtags.length === 0 ? (
-                <Typography variant="p">
-                  This user hasn't used any hashtags on this topic.
-                </Typography>
+                <div>This user hasn't used any hashtags on this topic.</div>
               ) : hashtags.length > 2 ? (
                 <div>
-                  <Typography variant="p">These are</Typography>
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    very common hashtags
-                  </Typography>
-                  <Typography variant="p">
-                    for this topic and location combination. This user may be
-                    aligned with a larger movement or these hashtags could be
-                    fairly generic.
-                  </Typography>
+                  These are <b>very common hashtags</b>for this topic and
+                  location combination. This user may be aligned with a larger
+                  movement or these hashtags could be fairly generic.
                 </div>
               ) : (
                 <div>
-                  <Typography variant="p">These are </Typography>
-                  <Typography variant="p" style={{ fontWeight: "bold" }}>
-                    very uncommon hashtags{" "}
-                  </Typography>
-                  <Typography variant="p">
-                    for this topic and location combination. This may be a
-                    unique hashtag and could be specific or could be nonsense.
-                  </Typography>
+                  These are <b>very uncommon hashtags</b> for this topic and
+                  location combination. This may be a unique hashtag and could
+                  be specific or could be nonsense.
                 </div>
               )}
             </TableCell>
