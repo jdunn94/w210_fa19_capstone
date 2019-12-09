@@ -149,12 +149,13 @@ const Header = props => {
           <Grid container item direction="row" md={10} justify="flex-end">
             <Grid item>
               <Autocomplete
-                id="combo-box-demo"
+                id="autocomplete-topic"
                 options={topics}
                 getOptionLabel={option => option}
                 style={{ width: 300, color: "white" }}
                 onChange={handleChangeTopic}
                 value={topic}
+                autoHighlight
                 renderInput={params => (
                   <TextField
                     {...params}
@@ -186,12 +187,13 @@ const Header = props => {
             </Grid>
             <Grid item>
               <Autocomplete
-                id="combo-box-demo"
+                id="autocomplete-location"
                 options={locations}
                 getOptionLabel={option => option}
                 style={{ width: 450 }}
                 onChange={handleChangeLocation}
                 value={location}
+                autoHighlight
                 renderInput={params => (
                   <TextField
                     {...params}

@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: "center",
     padding: "0px 20px 0px 20px",
     height: "32px",
-    width:"100%"
+    width: "100%"
   },
   pageNav: {
     display: "flex",
@@ -45,7 +45,7 @@ const BlockContainer = props => {
   const [displayPage, updatePage] = useState(0);
   const [isLoading, updateLoading] = useState(true);
 
-    useEffect(() => {
+  useEffect(() => {
     const session = driver.session();
     updateItems(old => []);
     updateLoading(true);
@@ -70,7 +70,13 @@ const BlockContainer = props => {
   if (isLoading) {
     const count = props.passThru ? [0] : [0, 1, 2];
     return (
-      <Grid container item className={classes.results} direction="column" spacing={2}>
+      <Grid
+        container
+        item
+        className={classes.results}
+        direction="column"
+        spacing={2}
+      >
         {props.title && (
           <Grid item className={classes.header}>
             <Skeleton variant="text" className={classes.header} />
@@ -78,7 +84,10 @@ const BlockContainer = props => {
         )}
         {count.map((a, i) => (
           <Grid item key={i}>
-            <Skeleton variant="rect" style={{minWidth:"100%", minHeight:props.cardHeight}} />
+            <Skeleton
+              variant="rect"
+              style={{ minWidth: "100%", minHeight: props.cardHeight }}
+            />
           </Grid>
         ))}
       </Grid>
@@ -87,16 +96,46 @@ const BlockContainer = props => {
 
   if (items.length === 0 && !props.passThru) {
     return (
-      <Card style={{ width: "100%" }}>
-        <Typography>No results</Typography>
-      </Card>
+      <Grid
+        container
+        item
+        spacing={1}
+        justify="flex-start"
+        alignItems="flex-start"
+        alignContent="flex-start"
+        direction="row"
+        className={classes.results}
+        sm={12}
+        style={{ height: "100%" }}
+      >
+        {props.title && (
+          <Grid container item justify="space-between" alignItems="baseline">
+            <Typography style={{ height: "32px" }}>{props.title}</Typography>
+          </Grid>
+        )}
+        <Card
+          style={{
+            width: "100%",
+            height: props.cardHeight,
+            padding: "16px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Typography variant="h5">No results</Typography>
+        </Card>
+      </Grid>
     );
   }
 
-  const itemsPage = props.pageSize === 0 ? items : items.slice(
-    displayPage * props.pageSize,
-    (1 + displayPage) * props.pageSize
-  );
+  const itemsPage =
+    props.pageSize === 0
+      ? items
+      : items.slice(
+          displayPage * props.pageSize,
+          (1 + displayPage) * props.pageSize
+        );
 
   let header = null;
   if (props.title && props.multiple) {
@@ -143,7 +182,7 @@ const BlockContainer = props => {
   let children;
   if (props.passThru) {
     children = (
-      <Grid item style={{width: "100%", height:"100%"}}>
+      <Grid item style={{ width: "100%", height: "100%" }}>
         {React.cloneElement(props.children, {
           data: itemsPage
         })}
@@ -182,7 +221,7 @@ const BlockContainer = props => {
       direction="row"
       className={classes.results}
       sm={12}
-      style={{height:"100%"}}
+      style={{ height: "100%" }}
     >
       {header}
       {children}

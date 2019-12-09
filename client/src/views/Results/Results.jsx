@@ -102,8 +102,32 @@ const Results = props => {
   ORDER BY u.followers_count + u.friend_count
   `;
 
-  console.log(userQuery)
-  console.log(thoughtLeaderQuery);
+  const leaderBoards = [
+    {
+      query: thoughtLeaderQuery,
+      title: "Thought Leaders",
+      helperText:
+        "Thought leaders are users who have a high in-degree of retweets and mentions. handles. These accounts have captured the attention of their follower networks and can be very influential."
+    },
+    {
+      query: contentCreatorQuery,
+      title: "Content Creators",
+      helperText:
+        "Content creators are users who have a high out-degree of original tweets. These accounts consistently share ideas and opinions on the subject on a more consistent basis than other users in their networks."
+    },
+    {
+      query: amplifierQuery,
+      title: "Amplifiers",
+      helperText:
+        "Amplifiers are users who have a high out-degree of retweets. These accounts are focused on broadcasting the opinions and ideas of others in their networks."
+    },
+    {
+      query: watchdogQuery,
+      title: "Watchdogs",
+      helperText:
+        "Watchdogs are users who have a high out-degree of mentions. These accounts may be alerting others of breaking news or holding prominent Twitter users accountable."
+    }
+  ];
 
   return (
     <React.Fragment>
@@ -121,46 +145,22 @@ const Results = props => {
         alignItems="flex-start"
         spacing={2}
       >
-        <Grid item sm={3} className={classes.leaderboard}>
-          <BlockContainer
-            query={thoughtLeaderQuery}
-            cardHeight={"176px"}
-            passThru
-            pageSize={0}
-          >
-            <LeaderBoard title={"Thought Leaders"} history={props.history} />
-          </BlockContainer>
-        </Grid>
-        <Grid item sm={3} className={classes.leaderboard}>
-          <BlockContainer
-            query={contentCreatorQuery}
-            cardHeight={"176px"}
-            passThru
-            pageSize={0}
-          >
-            <LeaderBoard title={"Content Creators"} history={props.history} />
-          </BlockContainer>
-        </Grid>
-        <Grid item sm={3} className={classes.leaderboard}>
-          <BlockContainer
-            query={amplifierQuery}
-            cardHeight={"176px"}
-            passThru
-            pageSize={0}
-          >
-            <LeaderBoard title={"Amplifiers"} history={props.history} />
-          </BlockContainer>
-        </Grid>
-        <Grid item sm={3} className={classes.leaderboard}>
-          <BlockContainer
-            query={watchdogQuery}
-            cardHeight={"176px"}
-            passThru
-            pageSize={0}
-          >
-            <LeaderBoard title={"Watchdogs"} history={props.history} />
-          </BlockContainer>
-        </Grid>
+        {leaderBoards.map((role, i) => (
+          <Grid item sm={3} className={classes.leaderboard} key={i}>
+            <BlockContainer
+              query={role.query}
+              cardHeight={"220px"}
+              passThru
+              pageSize={0}
+            >
+              <LeaderBoard
+                title={role.title}
+                history={props.history}
+                helperText={role.helperText}
+              />
+            </BlockContainer>
+          </Grid>
+        ))}
         <Grid item sm={12}>
           <Divider variant="middle" />
         </Grid>
