@@ -382,7 +382,9 @@ const UserInsightCard = props => {
   const tweetToLine = tweet => {
     const created = new Date(
       tweet.properties.created_at_date.toString()
-    ).toLocaleDateString();
+    ).toLocaleDateString() + " " + 
+		  new Date(tweet.properties.created_at_date.toString()
+		  ).toLocaleTimeString();
     const text = decodeEntities(tweet.properties.text);
     const retweets = tweet.properties.retweet_count.toString();
     const favorites = tweet.properties.favorite_count.toString();
