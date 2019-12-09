@@ -559,7 +559,7 @@ const UserInsightCard = props => {
         <Typography variant="subtitle2">Insights:</Typography>
         {insights}
         <br />
-        <Typography variant="subtitle2">Popular Tweets:</Typography>
+        <Typography variant="subtitle2">Popular Tweets</Typography>
         {props.data.get("tweets").map(a => tweetToLine(a))}
       </CardContent>
     </Card>

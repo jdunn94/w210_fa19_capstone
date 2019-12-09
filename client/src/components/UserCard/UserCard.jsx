@@ -141,7 +141,7 @@ const UserCard = props => {
     <div>
       <br />
       <Typography variant="subtitle2" className={classes.entrySubtitle}>
-        <b>Popular tweets:</b>
+        <b>Popular Tweets</b>
       </Typography>
       {props.data.get("tweets").map(a => tweetToLine(a))}
     </div>
