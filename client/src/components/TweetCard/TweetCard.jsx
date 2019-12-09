@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent, Typography, Link, makeStyles } from "@material-ui/core";
 import logo from "./logo.png";
 import heart from "./heart.png";
+import retweet from "./retweet.png";
 import tweet from "./tweet.png";
 import person from "./people.png";
 import { decodeEntities } from "../../utilities";
@@ -130,11 +131,12 @@ const TweetCard = props => {
             {!!props.data.get("tweets").properties.favorite_count
               ? props.data.get("tweets").properties.favorite_count.toString()
               : "n/a"}{" "}
-            | Retweets:{" "}
+            | <img src={retweet} alt="Retweet" style={{ marginRight: "4px" }} /> 
+	  	Retweets:{" "}
             {!!props.data.get("tweets").properties.retweet_count
               ? props.data.get("tweets").properties.retweet_count.toString()
               : "n/a"}{" "}
-            |{" "}
+            <br />
             {new Date(
               props.data.get("tweets").properties.created_at_date.toString()
             ).toLocaleDateString() +

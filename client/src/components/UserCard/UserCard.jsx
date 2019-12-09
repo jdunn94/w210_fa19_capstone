@@ -106,7 +106,7 @@ const UserCard = props => {
 	<Typography gutterBottom className={classes.entrySubtitle}>
 	    <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
 	    Favorites: {favorites} | 
-	    <img src={retweet} alt="Retweet"/>
+	    <img src={retweet} alt="Retweet" style={{ marginRight: "4px" }} />
 	    Retweets: {retweets} | {created} 
     	</Typography>
      </div>

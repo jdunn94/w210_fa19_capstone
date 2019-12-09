@@ -80,6 +80,10 @@ const useStyles = makeStyles({
     color: "#7a7a7a",
     fontSize: "14px"
   },
+  icon: {
+    padding: "10 10px",
+    float: "left"
+  },
 });
 
 const UserInsightCard = props => {
@@ -391,7 +395,7 @@ const UserInsightCard = props => {
 	<Typography gutterBottom className={classes.entrySubtitle}>
 	    <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
 	    Favorites: {favorites} | 
-	    <img src={retweet} alt="Retweet"/>
+	    <img src={retweet} alt="Retweet" style={{ marginRight: "4px" }}/>
 	    Retweets: {retweets} | {created} 
     	</Typography>
       </div>
@@ -553,7 +557,7 @@ const UserInsightCard = props => {
         <Typography variant="subtitle2">Insights:</Typography>
         {insights}
         <br />
-        <Typography variant="subtitle2">Popular tweets:</Typography>
+        <Typography variant="subtitle2">Popular Tweets:</Typography>
         {props.data.get("tweets").map(a => tweetToLine(a))}
       </CardContent>
     </Card>
