@@ -47,6 +47,7 @@ const User = props => {
   CALL db.index.fulltext.queryNodes("userLocation", CASE u.location WHEN "" THEN "n9uag3094ghoefkdz" else '"""' + u.location +'"""' end)
   yield node as u_local, score
   OPTIONAL match (u_local)-[r2:TWEETS_ABOUT {persona: r.persona}]->(o)
+  WHERE r2.topical_volume > 0
   OPTIONAL match (u_local)-[:COMMON_HASHTAG]->(h2:Hashtag)<-[:GENERATED]-(o)
   with u,r,o,hashtags,tweets,r2,h2
   order by h2.topical_count desc
@@ -54,6 +55,7 @@ const User = props => {
   
   // find all users
   OPTIONAL match (u_all:User)-[r3:TWEETS_ABOUT {persona: r.persona}]->(o)
+  WHERE r3.topical_volume > 0
   OPTIONAL match (u_all)-[:COMMON_HASHTAG]->(h3:Hashtag)<-[:GENERATED]-(o)
   WITH u,r,o,hashtags,tweets,local_stats,r3,h3
   order by h3.topical_count desc

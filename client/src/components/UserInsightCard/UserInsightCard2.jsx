@@ -27,9 +27,6 @@ import StyledTooltip from "../StyledTooltip";
 
 import { mdiHelpRhombus } from "@mdi/js";
 
-import heart from "./heart.png";
-import retweet from "./retweet.png";
-
 const useStyles = makeStyles({
   boxplot: {
     color: "red"
@@ -49,15 +46,7 @@ const useStyles = makeStyles({
     marginBottom: 12
   },
   quotedTweet: {
-    //background: grey[300]
-    display: "block !important",
-    margin: "5px 0 !important",
-    padding: "7px 0 !important",
-    //background: "#ebebeb !important",
-    color: "#1f1f1f !important",
-    textDecoration: "none !important",
-    borderRadius: "13px !important",
-    boxShadow: "-1px -1px 1px #d6d6d6 !important" 
+    background: grey[300]
   },
   userInfo: {
     display: "flex",
@@ -73,17 +62,7 @@ const useStyles = makeStyles({
   },
   cell: {
     padding: "6px 24px 6px 16px"
-  },
-  entrySubtitle: {
-    fontFamily: "Arial, sans-serif !important",
-    //maxWidth: "300px !important",
-    color: "#7a7a7a",
-    fontSize: "14px"
-  },
-  icon: {
-    padding: "10 10px",
-    float: "left"
-  },
+  }
 });
 
 const UserInsightCard = props => {
@@ -382,9 +361,7 @@ const UserInsightCard = props => {
   const tweetToLine = tweet => {
     const created = new Date(
       tweet.properties.created_at_date.toString()
-    ).toLocaleDateString() + " " + 
-		  new Date(tweet.properties.created_at_date.toString()
-		  ).toLocaleTimeString();
+    ).toLocaleDateString();
     const text = decodeEntities(tweet.properties.text);
     const retweets = tweet.properties.retweet_count.toString();
     const favorites = tweet.properties.favorite_count.toString();
@@ -392,14 +369,11 @@ const UserInsightCard = props => {
     return (
       <div className={classes.quotedTweet} key={tweet.properties.id}>
         <Typography gutterBottom>
+          <b>
+            {created} | RT: {retweets} | F: {favorites}{" "}
+          </b>
           {text}
         </Typography>
-	<Typography gutterBottom className={classes.entrySubtitle}>
-	    <img src={heart} alt="Heart" style={{ marginRight: "4px" }} />
-	    Favorites: {favorites} | 
-	    <img src={retweet} alt="Retweet" style={{ marginRight: "4px" }}/>
-	    Retweets: {retweets} | {created} 
-    	</Typography>
       </div>
     );
   };
@@ -519,7 +493,7 @@ const UserInsightCard = props => {
                 <div>This user hasn't used any hashtags on this topic.</div>
               ) : hashtags.length > 2 ? (
                 <div>
-                  These are <b>very common hashtags</b> for this topic and
+                  These are <b>very common hashtags</b>for this topic and
                   location combination. This user may be aligned with a larger
                   movement or these hashtags could be fairly generic.
                 </div>
@@ -559,7 +533,7 @@ const UserInsightCard = props => {
         <Typography variant="subtitle2">Insights:</Typography>
         {insights}
         <br />
-        <Typography variant="subtitle2">Popular Tweets</Typography>
+        <Typography variant="subtitle2">Popular tweets:</Typography>
         {props.data.get("tweets").map(a => tweetToLine(a))}
       </CardContent>
     </Card>
