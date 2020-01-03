@@ -1,0 +1,1 @@
+MATCH (t:Tweet) WHERE t.text CONTAINS "RT" RETURN t.id

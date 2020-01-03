@@ -1,0 +1,1 @@
+MERGE (top:Topic {name: {topic}})

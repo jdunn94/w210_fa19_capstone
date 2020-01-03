@@ -1,0 +1,1 @@
+MATCH (t:Tweet) WHERE NOT EXISTS(t.sentiment) RETURN t.id, t.text
