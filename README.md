@@ -1,13 +1,13 @@
 # UC Berkeley MIDS Fall 2019 Capstone
 Jimmy Dunn, Christian Millsop, Anne Yu, Blake Williamson
 
-
 ## backend
+Code for ETL pipeline, database infrastructure, and machine learning models.
 
 ## client
 https://mic-check-ai.firebaseapp.com
 
-The code is in the client folder.  It requires NodeJS to develop and build, and firebase for deployment/hosting.
+Code for front end web application. It requires NodeJS to develop and build, and firebase for deployment/hosting.
 
 Install the project:
 `npm install`
@@ -22,5 +22,7 @@ Deploy to production (requires firebase CLI and login):
 `firebase deploy`
 
 ## data
+Database config and dumps.
 
 ## research
+Preliminary explorations of Twitter APIs.
