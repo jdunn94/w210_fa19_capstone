@@ -1,13 +1,10 @@
-# w210_fa19_capstone
-Fall 2019 capstone project for UC Berkeley MIDS program
+# UC Berkeley MIDS Fall 2019 Capstone
+Jimmy Dunn, Christian Millsop, Anne Yu, Blake Williamson
 
 
-## Models
+## backend
 
-## Data
-
-
-## User Interface
+## client
 https://mic-check-ai.firebaseapp.com
 
 The code is in the client folder.  It requires NodeJS to develop and build, and firebase for deployment/hosting.
@@ -23,3 +20,7 @@ Build a production copy:
 
 Deploy to production (requires firebase CLI and login):
 `firebase deploy`
+
+## data
+
+## research
